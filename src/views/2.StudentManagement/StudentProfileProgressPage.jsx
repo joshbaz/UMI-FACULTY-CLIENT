@@ -1,10 +1,309 @@
-import React from 'react'
+import React, { useState, useMemo, useCallback } from "react";
 
-const StudentProfileProgressPage = ({studentData}) => {
+import {
+  useGetStudentStatuses,
+  useGetStudentProposals,
+} from "@/store/tanstackStore/services/queries";
+import { Icon } from "@iconify-icon/react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import StudentProfileProgressStatusTable from "./StudentProfileProgressStatusTable.jsx";
+import StudentProfileProgressProposalTable from "./StudentProfileProgressProposalTable.jsx";
+import StudentProfileProgressStatusDrawer from "./StudentProfileProgressStatusDrawer.jsx";
+import StudentProfileProgressProposalDrawer from "./StudentProfileProgressProposalDrawer.jsx";
+import { useParams } from "react-router-dom";
+
+const StudentProfileProgressPage = ({ studentData }) => {
+  const [activeView, setActiveView] = useState("tracker");
+  const [isStatusDrawerOpen, setIsStatusDrawerOpen] = useState(false);
+  const [isProposalDrawerOpen, setIsProposalDrawerOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedProposal, setSelectedProposal] = useState(null);
+  const { id } = useParams();
+
+  const {
+    data: studentStatuses,
+    isLoading: isLoadingStudentStatuses,
+  } = useGetStudentStatuses(id);
+
+  const { data: proposals, isLoading: isLoadingProposals } = useGetStudentProposals(id);
+
+  const currentStatus = useMemo(
+    () => studentData?.student?.statuses?.find((s) => s.isCurrent),
+    [studentData?.student?.statuses]
+  );
+
+  const currentSupervisor = useMemo(
+    () => studentData?.student?.supervisors?.[0],
+    [studentData?.student?.supervisors]
+  );
+
+  const { totalDays, enrollmentDate, expectedDays } = useMemo(() => {
+    const enrollmentDate = studentData?.student?.createdAt
+      ? new Date(studentData?.student?.createdAt)
+      : new Date();
+    const totalDays = Math.ceil(
+      (new Date() - enrollmentDate) / (1000 * 60 * 60 * 24)
+    );
+    const expectedDays = studentData?.student?.expectedCompletionDate
+      ? Math.ceil(
+          (new Date(studentData?.student?.expectedCompletionDate) -
+            enrollmentDate) /
+            (1000 * 60 * 60 * 24)
+        )
+      : null;
+    return { totalDays, enrollmentDate, expectedDays };
+  }, [
+    studentData?.student?.createdAt,
+    studentData?.student?.expectedCompletionDate,
+  ]);
+
+  const handleViewChange = useCallback((view) => {
+    setActiveView(view);
+  }, []);
+
+  const renderTimelineBar = useCallback(
+    (status, index) => {
+      const startDate = new Date(status.startDate);
+      const endDate =
+        index < studentData.student.statuses.length - 1
+          ? new Date(studentData.student.statuses[index + 1].startDate)
+          : new Date();
+      const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+      const position = Math.ceil(
+        (startDate - enrollmentDate) / (1000 * 60 * 60 * 24)
+      );
+
+      return (
+        <TooltipProvider key={status.id} className="z-[9999] h-full">
+          <Tooltip className="z-[9999] h-full">
+            <TooltipTrigger className="z-[9999] h-full relative">
+              <div
+                key={status.id}
+                className="h-full group cursor-pointer"
+                style={{
+                  width: `${duration * 2}px`,
+                  left: `${position * 2}px`,
+                  backgroundColor: status?.definition?.color || "#313132",
+                }}
+              >
+                <span
+                  className="absolute -top-4 text-xs font-medium text-[#626263]"
+                  style={{
+                    left: `${duration}px`,
+                    transform: "translateX(-50%)",
+                  }}
+                >
+                  {duration}
+                </span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              {status?.definition?.name} (
+              {new Date(status?.startDate).toLocaleDateString()} -{" "}
+              {index < studentData?.student?.statuses?.length - 1
+                ? new Date(
+                    studentData?.student?.statuses[index + 1]?.startDate
+                  ).toLocaleDateString()
+                : "Present"}
+              )
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
+    [enrollmentDate, studentData?.student?.statuses?.length]
+  );
+
+  const renderTimelineLegend = useCallback(
+    (status) => (
+      <div key={status.id} className="flex items-center gap-1.5">
+        <div
+          className="w-2.5 h-2.5 rounded-sm"
+          style={{
+            backgroundColor: status.definition?.color || "#313132",
+          }}
+        />
+        <span className="text-xs font-[Inter-Regular] text-[#626263] capitalize">
+          {status.definition?.name || "Unknown"}
+        </span>
+      </div>
+    ),
+    []
+  );
+
+  if (isLoadingStudentStatuses) {
+    return <div>Loading...</div>;
+  }
+
+  if (!studentData) {
+    return <div>Student not found</div>;
+  }
 
   return (
-    <div>StudentProfileProgressPage</div>
-  )
-}
+    <div className="space-y-6 ">
+      {/* Section 1: Student Information Details */}
+      <div className="grid grid-cols-3 gap-x-16">
+        <div>
+          <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
+            Supervisor
+          </h3>
+          <div className="flex gap-2">
+            <span className="text-sm font-[Inter-Regular] text-gray-900">
+              {" "}
+              {currentSupervisor
+                ? `${currentSupervisor.title} ${currentSupervisor.name} `
+                : "No supervisor assigned"}
+            </span>
+            <button className="text-[#626263]">
+              <Icon
+                icon="tabler:selector"
+                width="20"
+                height="20"
+                className=" text-[#626263]"
+              />
+            </button>
+          </div>
+        </div>
 
-export default StudentProfileProgressPage
+        <div>
+          <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
+            Current Status
+          </h3>
+          <span
+            style={{
+              color: currentStatus?.definition?.color || "#6B7280",
+              backgroundColor:
+                `${currentStatus?.definition?.color}18` || "#F3F4F6",
+              border: `1px solid ${
+                currentStatus?.definition?.color || "#6B7280"
+              }`,
+            }}
+            className="inline-flex px-2 py-0.5 rounded-[4px] text-sm font-[Inter-Regular] capitalize"
+          >
+            {currentStatus?.definition?.name || "Unknown"}
+          </span>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
+            Total Time
+          </h3>
+          <span className="text-sm font-[Inter-Regular] text-gray-900">
+            {totalDays} {expectedDays && `of ${expectedDays} days`}
+          </span>
+        </div>
+      </div>
+
+      {/* Section 2: Timeline */}
+      <div className="flex flex-col gap-2">
+        <h3 className="text-sm font-[Inter-Regular] text-gray-500 mb-4">
+          Timeline (Days)
+        </h3>
+
+        <div className="flex flex-col">
+          {/* Timeline Progress Bar */}
+          <div className="space-y-2">
+            <div className="relative h-8 bg-white shadow-md flex gap-1">
+              {studentData.student?.statuses?.map((status, index) =>
+                renderTimelineBar(status, index)
+              )}
+            </div>
+          </div>
+          {/* Timeline Legend */}
+          <div className="flex items-center justify-between gap-4 mt-3">
+            {studentData.student?.statuses?.map(renderTimelineLegend)}
+          </div>
+        </div>
+      </div>
+
+      {/* Section 3: Status Action Tracker and Proposal Table and Book Table */}
+      <div className="bg-white rounded-lg py-2 space-y-4">
+        {/* Options */}
+        <div className="flex gap-4 px-4 pt-4">
+          <button
+            onClick={() => handleViewChange("tracker")}
+            className={`text-sm font-[Inter-Medium] border py-1 px-2 rounded-lg cursor-pointer select-none ${
+              activeView === "tracker"
+                ? "border-secondary-800 bg-secondary-100  text-primary-800"
+                : "border-secondary-700 bg-white text-secondary-800"
+            }`}
+          >
+            Status Action Tracker
+          </button>
+
+          <button
+            onClick={() => handleViewChange("proposal")}
+            className={`text-sm font-[Inter-Medium] border py-1 px-2 rounded-lg cursor-pointer select-none ${
+              activeView === "proposal"
+                ? "border-secondary-800 bg-secondary-100  text-primary-900"
+                : "border-secondary-700 bg-white text-secondary-800"
+            }`}
+          >
+            Proposal Grading
+          </button>
+
+          <button
+            onClick={() => handleViewChange("book")}
+            className={`text-sm font-[Inter-Medium] border py-1 px-2 rounded-lg cursor-pointer select-none ${
+              activeView === "book"
+                ? "border-secondary-800 bg-secondary-100  text-primary-900"
+                : "border-secondary-700 bg-white text-secondary-800"
+            }`}
+          >
+            Book Grading
+          </button>
+        </div>
+
+        {/* Content */}
+        {/* Status Tracker Table */}
+        {activeView === "tracker" && (
+          <div className="px-4">
+            <StudentProfileProgressStatusTable
+              statuses={studentStatuses?.statuses || []}
+              isLoading={isLoadingStudentStatuses}
+              setIsStatusDrawerOpen={setIsStatusDrawerOpen}
+              setSelectedStatus={setSelectedStatus}
+            />
+          </div>
+        )}
+
+        {/* Grading Progress Table */}
+        {activeView === "proposal" && (
+          <StudentProfileProgressProposalTable
+            setIsStatusDrawerOpen={setIsProposalDrawerOpen}
+            setSelectedStatus={setSelectedProposal}
+            studentId={studentData?.student?.id}
+            proposals={proposals?.proposals || []}
+            isLoadingProposals={isLoadingProposals}
+          />
+        )}
+      </div>
+
+      {isStatusDrawerOpen && (
+        <StudentProfileProgressStatusDrawer
+          isOpen={isStatusDrawerOpen}
+          onClose={() => setIsStatusDrawerOpen(false)}
+          studentId={studentData?.student?.id}
+          studentData={studentData?.student}
+          selectedStatus={selectedStatus}
+        />
+      )}
+
+      {isProposalDrawerOpen && (
+        <StudentProfileProgressProposalDrawer
+          isOpen={isProposalDrawerOpen}
+          onClose={() => setIsProposalDrawerOpen(false)}
+          proposalData={selectedProposal}
+         
+        />
+      )}
+    </div>
+  );
+};
+
+export default StudentProfileProgressPage;

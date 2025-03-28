@@ -1,84 +1,112 @@
 import { useQuery } from '@tanstack/react-query';
 import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService } from './api.js';
 
-export const useGetFacultyProfile = () => {
+// Common options for most queries
+function getDefaultQueryOptions() {
+  return {
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes instead of Infinity
+    refetchInterval: false,
+    networkMode: 'online',
+  };
+}
+
+export function useGetFacultyProfile() {
   return useQuery({
     queryKey: ['facultyProfile'],
     queryFn: getFacultyProfile,
-    staleTime: Infinity,
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+    networkMode: 'online',
   });
-};
+}
 
 /* ********** STUDENT MANAGEMENT ********** */
 
-export const useGetAllStudents = () => {
+export function useGetAllStudents() {
   return useQuery({
     queryKey: ['allStudents'],
     queryFn: getAllStudents,
-    staleTime: Infinity,
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+    networkMode: 'online',
   });
-};
+}
 
-
-export const useGetStudent = (studentId: string) => {
+export function useGetStudent(studentId: string) {
   return useQuery({
     queryKey: ['student', studentId],
     queryFn: () => getStudent(studentId),
-    staleTime: Infinity,
+    enabled: Boolean(studentId), // Only run if studentId exists
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+    networkMode: 'online',
   });
-};
+}
 
-export const useGetStudentStatuses = (studentId: string) => {
+export function useGetStudentStatuses(studentId: string) {
   return useQuery({
     queryKey: ['studentStatuses', studentId],
     queryFn: () => getStudentStatuses(studentId),
-    staleTime: Infinity,
+    enabled: Boolean(studentId),
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+    networkMode: 'online',
   });
-};
+}
 
 /* ********** END OF STUDENT MANAGEMENT ********** */
 
 /* ********** PROPOSAL MANAGEMENT ********** */
 
-export const useGetStudentProposals = (studentId: string) => {
+export function useGetStudentProposals(studentId: string) {
   return useQuery({
     queryKey: ['studentProposals', studentId],
     queryFn: () => getStudentProposals(studentId),
-    staleTime: Infinity,
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+    networkMode: 'online',
   });
-};
+}
 
-export const useGetProposal = (studentId: string, proposalId: string) => {
+export function useGetProposal(studentId: string, proposalId: string) {
   return useQuery({
     queryKey: ['proposal', studentId, proposalId],
     queryFn: () => getProposal(studentId, proposalId),
-    staleTime: Infinity,
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+    networkMode: 'online',
   });
-};
+}
 
-
-  /* ********** END OF PROPOSAL MANAGEMENT ********** */  
+/* ********** END OF PROPOSAL MANAGEMENT ********** */  
 
 /* ********** REVIEWER MANAGEMENT ********** */
 
-export const useGetReviewers = () => {
+export function useGetReviewers() {
   return useQuery({
     queryKey: ['reviewers'],
     queryFn: getReviewersService,
-    staleTime: Infinity,
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+    networkMode: 'online',
   });
-};
+}
 
 /* ********** END OF REVIEWER MANAGEMENT ********** */
 
 /* ********** PANELIST MANAGEMENT ********** */
 
-export const useGetPanelists = () => {
+export function useGetPanelists() {
   return useQuery({
     queryKey: ['panelists'],
     queryFn: getPanelistsService,
-    staleTime: Infinity,
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+    networkMode: 'online',
   });
-};
+}
 
 /* ********** END OF PANELIST MANAGEMENT ********** */

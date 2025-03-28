@@ -1,30 +1,21 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { format } from "date-fns";
-
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetStudent } from "../../store/tanstackStore/services/queries";
 import StudentProfileProgressPage from "./StudentProfileProgressPage";
 import StudentProfileAccountSettings from "./StudentProfileAccountSettings";
-import { toast } from "sonner";
 import { Icon } from "@iconify-icon/react";
 import { Loader2, ArrowLeft } from "lucide-react";
 
-
-
 const StudentProfile = () => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("progress");
   const navigate = useNavigate();
   const { id } = useParams();
   const containerRef = useRef(null);
 
-  const handleSearch = useMemo(() => (value) => {
-    setSearchQuery(value);
-  }, []);
-
   const { data: studentData, isLoading, error } = useGetStudent(id);
 
-  if (error ) {
+  if (error) {
     return (
       <div className="min-h-full bg-gray-50 p-6">
         <div className="bg-white p-4 rounded-lg shadow-sm">
