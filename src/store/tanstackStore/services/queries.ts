@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService } from './api.js';
+import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals } from './api.js';
 
 // Common options for most queries
 function getDefaultQueryOptions() {
@@ -71,10 +71,20 @@ export function useGetStudentProposals(studentId: string) {
   });
 }
 
-export function useGetProposal(studentId: string, proposalId: string) {
+export function useGetProposal(proposalId: string) {
   return useQuery({
-    queryKey: ['proposal', studentId, proposalId],
-    queryFn: () => getProposal(studentId, proposalId),
+    queryKey: ['proposal', proposalId],
+    queryFn: () => getProposal(proposalId),
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+    networkMode: 'online',
+  });
+}
+
+export function useGetSchoolProposals() {
+  return useQuery({
+    queryKey: ['schoolProposals'],
+    queryFn: getSchoolProposals,
     staleTime: Infinity, // 1 minute
     refetchInterval: false,
     networkMode: 'online',

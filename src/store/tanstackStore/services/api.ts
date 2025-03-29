@@ -82,14 +82,7 @@ export const submitProposalService = async (studentId: string, proposal: any) =>
     }
 }
 
-export const getProposal = async (studentId: string, proposalId: string) => {
-    try {
-        const response = await apiRequest.get(`/faculty/proposals/${studentId}/${proposalId}`)
-        return response.data
-    } catch (error) {
-        errorHandling(error)
-    }
-}
+
 
 export const gradeProposal = async (studentId: string, proposalId: string, grade: number, feedback: string) => {
     try {
@@ -108,6 +101,26 @@ export const getStudentProposals = async (studentId: string) => {
         errorHandling(error)
     }
 }
+
+export const getSchoolProposals = async () => {
+    try {
+        const response = await apiRequest.get("/faculty/proposals")
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}
+
+export const getProposal = async (proposalId: string) => {
+    try {
+        const response = await apiRequest.get(`/faculty/proposal/${proposalId}`)
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}
+
+
 
 /* ********** END OF PROPOSAL MANAGEMENT ********** */
 
@@ -131,6 +144,17 @@ export const getReviewersService = async () => {
     }
 }
 
+export const deleteReviewerService = async (proposalId: string, reviewerId: string) => {
+    try {
+        const response = await apiRequest.delete(`/faculty/reviewers/${proposalId}/${reviewerId}`)
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}
+
+
+
 /* ********** END OF REVIEWER MANAGEMENT ********** */
 
 /* ********** PANELIST MANAGEMENT ********** */
@@ -153,4 +177,38 @@ export const getPanelistsService = async () => {
     }
 }   
 
+
+export const deletePanelistService = async (proposalId: string, panelistId: string) => {
+    try {
+        const response = await apiRequest.delete(`/faculty/panelists/${proposalId}/${panelistId}`)
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}
+
 /* ********** END OF PANELIST MANAGEMENT ********** */
+
+/* ********** REVIEWER MARK MANAGEMENT ********** */
+
+export const addReviewerMarkService = async (proposalId: string, reviewerId: string, grade: number, feedback: string) => {
+    try {
+        const response = await apiRequest.post(`/faculty/reviewer-marks/${proposalId}/${reviewerId}`, { grade, feedback })
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}   
+
+/* ********** PANELIST MARK MANAGEMENT ********** */
+
+export const addPanelistMarkService = async (proposalId: string, panelistId: string, grade: number, feedback: string) => {
+    try {
+        const response = await apiRequest.post(`/faculty/panelist-marks/${proposalId}/${panelistId}`, { grade, feedback })
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}
+
+/* ********** END OF REVIEWER MARK MANAGEMENT ********** */

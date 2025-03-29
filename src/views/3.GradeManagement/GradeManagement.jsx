@@ -1,0 +1,183 @@
+import React, { useState, useEffect, useMemo } from "react";
+import { format } from "date-fns";
+import { useGetSchoolProposals } from "../../store/tanstackStore/services/queries";
+import { Loader2, Search } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { InfoIcon } from "lucide-react";
+import GradeManagementTableTabs from "./GradeManagementTableTabs";
+import GradeManagementTable from "./GradeManagementProposalTable";
+import GradeManagementBookTable from "./GradeManagementBookTable";
+import GradeManagementProposalTable from "./GradeManagementProposalTable";
+
+const GradeManagement = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [pageSize, setPageSize] = useState(
+    parseInt(localStorage.getItem("pageSize")) || 10
+  );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState("Proposal Grading");
+
+  // Get all proposals
+  const { data: proposalsData, isLoading, error } = useGetSchoolProposals();
+
+  // Get the correct data based on active tab
+ 
+
+  // Filter data based on search
+  const filteredProposals = useMemo(() => {
+    return (proposalsData?.proposals || []).filter(
+      (proposal) =>
+        activeTab === "Proposal Grading" &&
+        (proposal?.student?.firstName
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+          proposal?.student?.lastName
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          proposal?.student?.email
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()))
+    );
+  }, [proposalsData?.proposals, activeTab, searchTerm]);
+
+  // Pagination logic
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedData = filteredProposals.slice(
+    startIndex,
+    startIndex + pageSize
+  );
+
+  // Reset pagination when switching tabs
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen gap-2">
+        <Loader2 className="h-4 w-4 animate-spin text-green-900" />
+        <div className="text-lg font-[Inter-Medium] text-gray-600">
+          {" "}
+          Loading grading data...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-lg font-[Inter-Medium] text-red-600">
+          Error: {error.message}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-6">
+      {/* Top Search Bar */}
+      <div className="flex px-6 justify-between items-center border-b border-gray-300 h-[89px]">
+        {/* Search Bar */}
+        <div className="relative w-1/2">
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-semantic-text-secondary"
+            size={18}
+          />
+          <input
+            type="text"
+            placeholder="Search by Name"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-semantic-surface text-sm font-[Inter-Regular]  border border-semantic-bg-border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-200"
+          />
+        </div>
+      </div>
+
+      {/* Header */}
+      <div className="flex justify-between items-center px-6 py-3">
+        <h1 className="text-2xl font-[Inter-Medium]">Grading Records</h1>
+        <span className="text-sm font-[Inter-Regular] text-gray-500">
+          Last login: {format(new Date(), "MM-dd-yyyy hh:mm:ssaa")}
+        </span>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4 px-6">
+        <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
+          <p className=" text-3xl font-[Inter-Medium]">45</p>
+          <h3 className="text-sm font-[Inter-Medium] text-gray-500">
+            Proposals Submitted
+          </h3>
+        </div>
+
+        <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
+          <p className="mt-2 text-3xl font-[Inter-Medium]">14</p>
+          <h3 className="text-sm font-[Inter-Medium] text-gray-500">
+            <div className="flex items-center gap-1">
+              Status: Proposal Graded - Passed
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon className="h-4 w-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Proposal Graded - Passed</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </h3>
+        </div>
+
+        <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
+          <p className="mt-2 text-3xl font-[Inter-Medium]">26</p>
+          <h3 className="text-sm font-[Inter-Medium] text-gray-500">
+            <div className="flex items-center gap-1">
+              Status: Proposal Graded - Failed
+              <TooltipProvider className="z-[9999] h-full">
+                <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon className="h-4 w-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Proposal Graded - Failed</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </h3>
+        </div>
+      </div>
+
+      {/* Tab, Search, Table and Pagination */}
+      <div className="bg-white py-4 rounded-lg shadow-md mx-6 mb-8">
+        <GradeManagementTableTabs
+          selectedCategory={activeTab}
+          setSelectedCategory={setActiveTab}
+        />
+
+        <div className="px-4 mt-4">
+          {activeTab === "Proposal Grading" ? (
+            <GradeManagementProposalTable 
+              data={paginatedData}
+              pageSize={pageSize}
+              setPageSize={setPageSize}
+              currentPage={currentPage} 
+              setCurrentPage={setCurrentPage}
+              totalCount={filteredProposals.length}
+            />
+          ) : activeTab === "Book Examination" ? (
+            <GradeManagementBookTable />
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default GradeManagement;

@@ -93,7 +93,7 @@ const Login = () => {
                   value={formik.values.email}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className={`w-full font-[Inter-Regular] text-base p-2 border ${formik.touched.email && formik.errors.email ? 'border-red-500' : 'border-gray-200'} rounded text-sm`}
+                  className={`w-full font-[Inter-Regular] !text-gray-700 bg-transparent text-base p-2 border ${formik.touched.email && formik.errors.email ? 'border-red-500' : 'border-gray-200 focus:ring-1 focus:ring-primary-500'} rounded focus:outline-none  `}
                   placeholder="your.email@umi.ac.ug"
                 />
                 {formik.touched.email && formik.errors.email && (
@@ -116,7 +116,7 @@ const Login = () => {
                     value={formik.values.password}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full font-[Inter-Regular] shadow-none text-base p-2 border ${formik.touched.password && formik.errors.password ? 'border-red-500' : 'border-gray-200'} rounded text-sm`}
+                    className={`w-full font-[Inter-Regular] shadow-none text-base p-2 border ${formik.touched.password && formik.errors.password ? 'border-red-500' : 'border-gray-200 focus:ring-1 focus:ring-primary-500'} rounded focus:outline-none  `}
                     placeholder="Enter your password"
                   />
                   <button

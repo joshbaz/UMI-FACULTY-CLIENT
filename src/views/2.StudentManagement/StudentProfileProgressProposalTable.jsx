@@ -16,7 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Icon } from "@iconify-icon/react";
-import { useGetStudentProposals } from "../../store/tanstackStore/services/queries";
+// import { useGetStudentProposals } from "../../store/tanstackStore/services/queries";
 
 const StudentProfileProgressProposalTable = ({
   setIsStatusDrawerOpen,
