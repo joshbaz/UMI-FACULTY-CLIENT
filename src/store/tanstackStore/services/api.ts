@@ -120,6 +120,25 @@ export const getProposal = async (proposalId: string) => {
     }
 }
 
+export const addDefenseDateService = async (proposalId: string, defenseDate: string, type: string) => {
+    try {
+        const response = await apiRequest.post(`/faculty/proposals/${proposalId}/defense-date`, { defenseDate, type })
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}
+
+export const addComplianceReportDateService = async (proposalId: string, complianceReportDate: string) => {
+    try {
+        const response = await apiRequest.post(`/faculty/proposals/${proposalId}/compliance-report-date`, { complianceReportDate })
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}
+
+
 
 
 /* ********** END OF PROPOSAL MANAGEMENT ********** */

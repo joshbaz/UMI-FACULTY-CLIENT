@@ -17,7 +17,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Icon } from "@iconify-icon/react";
-
+import { format } from "date-fns";
 const getCategoryStyle = (status) => {
   switch (status) {
     case 'PASSED':
@@ -65,7 +65,7 @@ const GradeManagementProposalTable = ({
       }),
       columnHelper.accessor("defenseDate", {
         header: "Defense Date",
-        cell: (info) => info.getValue() || "-",
+        cell: (info) => info.getValue() ? format(new Date(info.getValue()), "dd-MMM-yyyy") : "-",
       }),
       columnHelper.accessor("status", {
         header: "Status",
@@ -89,17 +89,23 @@ const GradeManagementProposalTable = ({
           );
         },
       }),
-      columnHelper.accessor("markRange", {
+      columnHelper.accessor("averageDefenseMark", {
         header: "Mark Range",
-        cell: (info) => info.getValue() || "-",
+        cell: (info) => info.getValue() ? `${info.getValue()}%` : "-",
       }),
       columnHelper.accessor("defenseGrade", {
         header: "Category",
         cell: (info) => {
-          const grade = info.getValue();
+          const averageMark = info.row.original.averageDefenseMark;
+          let status = 'NOT GRADED';
+          
+          if (averageMark !== null && averageMark !== undefined) {
+            status = averageMark >= 60 ? 'PASSED' : 'FAILED';
+          }
+
           return (
-            <span className={getCategoryStyle(grade || 'NOT GRADED')}>
-              {grade || 'NOT GRADED'}
+            <span className={getCategoryStyle(status)}>
+              {status}
             </span>
           );
         },

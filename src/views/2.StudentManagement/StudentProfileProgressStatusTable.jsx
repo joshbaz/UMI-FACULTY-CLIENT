@@ -10,6 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Icon } from "@iconify-icon/react";
+import { format } from "date-fns";
 
 const StudentProfileProgressStatusTable = ({statuses, isLoading, setIsStatusDrawerOpen, setSelectedStatus}) => {
     const [globalFilter, setGlobalFilter] = React.useState("");
@@ -50,11 +51,11 @@ const StudentProfileProgressStatusTable = ({statuses, isLoading, setIsStatusDraw
         }),
         columnHelper.accessor("startDate", {
           header: "Start Date",
-          cell: (info) => new Date(info.getValue()).toLocaleDateString()
+          cell: (info) => format(new Date(info.getValue()), 'dd-MMM-yyyy')
         }),
         columnHelper.accessor("endDate", {
           header: "End Date", 
-          cell: (info) => info.getValue() ? new Date(info.getValue()).toLocaleDateString() : '-'
+          cell: (info) => info.getValue() ? format(new Date(info.getValue()), 'dd-MMM-yyyy') : '-'
         }),
         columnHelper.accessor("duration", {
           header: "Duration (Days)",

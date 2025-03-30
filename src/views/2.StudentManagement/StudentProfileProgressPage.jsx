@@ -84,33 +84,43 @@ const StudentProfileProgressPage = ({ studentData }) => {
             <TooltipTrigger className="z-[9999] h-full relative">
               <div
                 key={status.id}
-                className="h-full group cursor-pointer"
+                className="h-full group cursor-pointer hover:brightness-90 transition-all"
                 style={{
                   width: `${duration * 2}px`,
                   left: `${position * 2}px`,
                   backgroundColor: status?.definition?.color || "#313132",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+                  borderRadius: "2px"
                 }}
-              >
-                <span
-                  className="absolute -top-4 text-xs font-medium text-[#626263]"
-                  style={{
-                    left: `${duration}px`,
-                    transform: "translateX(-50%)",
-                  }}
-                >
-                  {duration}
-                </span>
-              </div>
+              />
             </TooltipTrigger>
-            <TooltipContent>
-              {status?.definition?.name} (
-              {new Date(status?.startDate).toLocaleDateString()} -{" "}
-              {index < studentData?.student?.statuses?.length - 1
-                ? new Date(
-                    studentData?.student?.statuses[index + 1]?.startDate
-                  ).toLocaleDateString()
-                : "Present"}
-              )
+            <TooltipContent className="bg-white p-2 rounded-lg shadow-lg border border-gray-200">
+              <div className="space-y-1">
+                <div className="font-medium text-gray-900">
+                  {status?.definition?.name}
+                </div>
+                <div className="text-sm text-gray-600">
+                  {new Date(status?.startDate).toLocaleDateString()} - {" "}
+                  {index < studentData?.student?.statuses?.length - 1
+                    ? new Date(
+                        studentData?.student?.statuses[index + 1]?.startDate
+                      ).toLocaleDateString()
+                    : "Present"}
+                </div>
+                <div className="text-xs font-[Inter-Regular] text-gray-900">
+                  Actual Duration: {duration} days
+                </div>
+                {status?.definition?.expectedDays && (
+                  <div className="text-sm font-[Inter-Regular] text-gray-900">
+                    Expected Duration: {status.definition.expectedDays} days
+                    {duration > status.definition.expectedDays && (
+                      <span className="text-red-500 ml-1">
+                        (Overdue by {duration - status.definition.expectedDays} days)
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -120,20 +130,29 @@ const StudentProfileProgressPage = ({ studentData }) => {
   );
 
   const renderTimelineLegend = useCallback(
-    (status) => (
-      <div key={status.id} className="flex items-center gap-1.5">
-        <div
-          className="w-2.5 h-2.5 rounded-sm"
-          style={{
-            backgroundColor: status.definition?.color || "#313132",
-          }}
-        />
-        <span className="text-xs font-[Inter-Regular] text-[#626263] capitalize">
-          {status.definition?.name || "Unknown"}
-        </span>
-      </div>
-    ),
-    []
+    (status) => {
+      // Check if this status definition has already been rendered
+      const isFirstOccurrence = studentData.student.statuses.findIndex(
+        s => s.definition?.name === status.definition?.name
+      ) === studentData.student.statuses.indexOf(status);
+
+      if (!isFirstOccurrence) return null;
+
+      return (
+        <div key={status.id} className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-md shadow-sm">
+          <div
+            className="w-3 h-3 rounded-sm flex-shrink-0"
+            style={{
+              backgroundColor: status.definition?.color || "#313132",
+            }}
+          />
+          <span className="text-xs font-[Inter-Medium] text-[#626263] capitalize whitespace-nowrap">
+            {status.definition?.name || "Unknown"}
+          </span>
+        </div>
+      );
+    },
+    [studentData?.student?.statuses]
   );
 
   if (isLoadingStudentStatuses) {
@@ -206,6 +225,31 @@ const StudentProfileProgressPage = ({ studentData }) => {
         </h3>
 
         <div className="flex flex-col">
+          {/* Expected Completion Date Indicator */}
+          {studentData?.student?.expectedCompletionDate && (
+            <div className="relative h-6 mb-1">
+              <div 
+                className="absolute h-6 border-l-2 border-red-500 border-dashed"
+                style={{
+                  left: '100%',
+                }}
+              >
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <div className="absolute -left-[6px] top-0 w-3 h-3 bg-red-500 rounded-full" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <div className="text-sm">
+                        Expected Completion Date: {new Date(studentData.student.expectedCompletionDate).toLocaleDateString()}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
+          )}
+          
           {/* Timeline Progress Bar */}
           <div className="space-y-2">
             <div className="relative h-8 bg-white shadow-md flex gap-1">
@@ -215,7 +259,7 @@ const StudentProfileProgressPage = ({ studentData }) => {
             </div>
           </div>
           {/* Timeline Legend */}
-          <div className="flex items-center justify-between gap-4 mt-3">
+          <div className="flex flex-wrap items-center gap-3 mt-4 p-3 bg-white rounded-lg shadow-sm">
             {studentData.student?.statuses?.map(renderTimelineLegend)}
           </div>
         </div>

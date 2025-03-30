@@ -148,7 +148,7 @@ const ReviewerItem = memo(({ reviewer, isSelected, onSelect }) => (
 ));
 
 {/** Main- Grade Proposal Reviewer Table */}
-const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick }) => {
+const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, reviewGrades, onViewClick }) => {
   const [globalFilter, setGlobalFilter] = useState('')
   const [pageIndex, setPageIndex] = useState(0)
   const [pageSize, setPageSize] = useState(10)
@@ -308,48 +308,82 @@ const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick }) =>
       cell: (info) => info.getValue(),
     },
     {
+      header: 'Comments',
+      accessorKey: 'comments',
+      cell: (info) => {
+        const reviewerId = info.row.original.id;
+        const grade = reviewGrades.find(grade => grade.gradedById === reviewerId);
+        return <div className='text-xs font-[Inter-Regular] whitespace-pre-wrap text-gray-600'>{grade ? grade.feedback : '-'}</div>;
+      },
+    },
+    {
       header: 'Marks',
       accessorKey: 'grade',
-      cell: (info) => info.getValue() || '-',
+      cell: (info) => {
+        const reviewerId = info.row.original.id;
+        const grade = reviewGrades.find(grade => grade.gradedById === reviewerId);
+        return grade ? `${grade.grade}%` : '-';
+      },
     },
     {
       header: 'Submitted',
       accessorKey: 'createdAt',
-      cell: (info) => 
-        info.getValue() 
-          ? format(new Date(info.getValue()), 'MM/dd/yyyy')
-          : '-',
+      cell: (info) => {
+        const reviewerId = info.row.original.id;
+        const grade = reviewGrades.find(grade => grade.gradedById === reviewerId);
+        return grade && grade.createdAt 
+          ? format(new Date(grade.createdAt), 'dd-MMM-yyyy') 
+          : '-';
+      },
     },
     {
       header: 'Updated',
       accessorKey: 'updatedAt',
-      cell: (info) => 
-        info.getValue() 
-          ? format(new Date(info.getValue()), 'MM/dd/yyyy')
-          : '-',
+      cell: (info) => {
+        const reviewerId = info.row.original.id;
+        const grade = reviewGrades.find(grade => grade.gradedById === reviewerId);
+        return grade && grade.updatedAt 
+          ? format(new Date(grade.updatedAt), 'dd-MMM-yyyy') 
+          : '-';
+      },
     },
     {
       header: '',
       accessorKey: 'action',
-      cell: (info) => (
-        <div className='flex items-center gap-4'>
-          <button
-            onClick={() => onUpdateClick(info.row.original)}
-            className="rounded border text-gray-700 border-semantic-bg-border shadow-sm py-1 px-2 hover:bg-gray-50 font-[Inter-Medium] text-sm"
-          >
-            Update
-          </button>
+      cell: (info) => {
+        const reviewerId = info.row.original.id;
+        const grade = reviewGrades.find(grade => grade.gradedById === reviewerId);
+        return (
+          <div className='flex items-center justify-end gap-4'>
+            {grade ? (
+              <button
+                onClick={() => onViewClick(info.row.original)} // Assuming there's a function to handle viewing
+                className="rounded border text-gray-700 border-semantic-bg-border shadow-sm py-1 px-2 hover:bg-gray-50 font-[Inter-Medium] text-sm"
+              >
+                View
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => onUpdateClick(info.row.original)}
+                  className="rounded border text-gray-700 border-semantic-bg-border shadow-sm py-1 px-2 hover:bg-gray-50 font-[Inter-Medium] text-sm"
+                >
+                  Update
+                </button>
 
-          <button
-            onClick={() => handleOpenDelete(info.row.original)}
-            className="rounded py-1 px-2 border border-[#FB3836] text-red-800 bg-red-100 flex items-center justify-center overflow-hidden"
-          >
-            Delete
-          </button>
-        </div>
-      )
+                <button
+                  onClick={() => handleOpenDelete(info.row.original)}
+                  className="rounded py-1 px-2 border border-[#FB3836] text-red-800 bg-red-100 flex items-center justify-center overflow-hidden"
+                >
+                  Delete
+                </button>
+              </>
+            )}
+          </div>
+        );
+      }
     },
-  ], [handleOpenDelete])
+  ], [handleOpenDelete, reviewGrades])
 
   const handlePaginationChange = useCallback((updater) => {
     if (typeof updater === 'function') {

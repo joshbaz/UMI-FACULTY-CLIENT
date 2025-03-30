@@ -107,7 +107,7 @@ const PaginationButtons = memo(({ table, currentPage, totalPages }) => {
   );
 });
 
-const GradeProposalPanelistTable = ({ panelists = [] , proposalId, onUpdateClick}) => {
+const GradeProposalPanelistTable = ({ panelists = [] , proposalId, onUpdateClick, defenseGrades, onViewClick   }) => {
   const [globalFilter, setGlobalFilter] = useState('')
   const [pageIndex, setPageIndex] = useState(0)
   const [pageSize, setPageSize] = useState(10)
@@ -238,32 +238,54 @@ const GradeProposalPanelistTable = ({ panelists = [] , proposalId, onUpdateClick
     {
       header: 'Marks',
       accessorKey: 'grade',
-      cell: (info) => info.getValue() || '-',
+      cell: (info) => {
+        const panelistId = info.row.original.id;
+        const grade = defenseGrades.find(grade => grade.gradedById === panelistId);
+        return grade ? `${grade.grade}%` : '-';
+      },
     },
     {
       header: 'Submitted',
       accessorKey: 'createdAt',
-      cell: (info) => 
-        info.getValue() 
-          ? format(new Date(info.getValue()), 'MM/dd/yyyy')
-          : '-',
+      cell: (info) => {
+        const panelistId = info.row.original.id;
+        const grade = defenseGrades.find(grade => grade.gradedById === panelistId);
+        return grade && grade.createdAt 
+          ? format(new Date(grade.createdAt), 'dd-MMM-yyyy') 
+          : '-';
+      },
     },
     {
       header: 'Updated',
       accessorKey: 'updatedAt',
-      cell: (info) => 
-        info.getValue() 
-          ? format(new Date(info.getValue()), 'MM/dd/yyyy')
-          : '-',
+      cell: (info) => {
+        const panelistId = info.row.original.id;
+        const grade = defenseGrades.find(grade => grade.gradedById === panelistId);
+        return grade && grade.updatedAt 
+          ? format(new Date(grade.updatedAt), 'dd-MMM-yyyy') 
+          : '-';
+      },
     },
     {
       header: '',
       accessorKey: 'action',
-      cell: (info) => (
-        <div className='flex items-center gap-4'>
-          <button
-            onClick={() => onUpdateClick(info.row.original)}
-            className="rounded border text-gray-700 border-semantic-bg-border shadow-sm py-1 px-2 hover:bg-gray-50 font-[Inter-Medium] text-sm"
+      cell: (info) => {
+        const panelistId = info.row.original.id;
+        const grade = defenseGrades.find(grade => grade.gradedById === panelistId);
+        return (
+        <div className='flex items-center justify-end gap-4'>
+          {grade ? (
+            <button
+              onClick={() => onViewClick(info.row.original)}
+              className="rounded border text-gray-700 border-semantic-bg-border shadow-sm py-1 px-2 hover:bg-gray-50 font-[Inter-Medium] text-sm"
+            >
+              View
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => onUpdateClick(info.row.original)}
+                className="rounded border text-gray-700 border-semantic-bg-border shadow-sm py-1 px-2 hover:bg-gray-50 font-[Inter-Medium] text-sm"
           >
             Update
           </button>
@@ -274,8 +296,13 @@ const GradeProposalPanelistTable = ({ panelists = [] , proposalId, onUpdateClick
           >
             Delete
           </button>
-        </div>
-      )
+          </> 
+          )
+        }
+        </div>  
+        ) 
+
+      }
     },
   ], [handleOpenDelete])
 

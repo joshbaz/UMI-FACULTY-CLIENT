@@ -35,6 +35,7 @@ const GradeProposalUpdateReviewerMark = ({
   const { data: facultyData } = useGetFacultyProfile();
   const queryClient = useQueryClient();
 
+  
   const initialValues = {
     mark: "",
     comments: "",
@@ -48,7 +49,7 @@ const GradeProposalUpdateReviewerMark = ({
       initialValues.mark = existingGrade.grade.toString();
       initialValues.comments = existingGrade.feedback || "";
     }
-  }, [reviewer, proposal]);
+  }, [reviewer, proposal?.reviewGrades]);
 
   const submitGradeMutation = useMutation({
     mutationFn: async (gradeData) => addReviewerMarkService(gradeData.proposalId, gradeData.gradedById, gradeData.grade, gradeData.feedback)
