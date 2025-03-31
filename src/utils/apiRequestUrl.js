@@ -1,7 +1,8 @@
 
 import axios from 'axios'
 
-export const BASE_API_URL = 'http://localhost:5000/api/v1';
+// export const BASE_API_URL = 'http://localhost:5000/api/v1';
+export const BASE_API_URL = 'http://138.68.132.20/api/v1';
 
 export const socketUrl = "localhost:5000"
 
