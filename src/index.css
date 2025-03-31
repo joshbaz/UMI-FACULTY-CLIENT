@@ -2,6 +2,21 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+.docx-preview {
+  background-color: white;
+  padding: 1rem;
+}
+
+.docx-preview table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.docx-preview td, .docx-preview th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {

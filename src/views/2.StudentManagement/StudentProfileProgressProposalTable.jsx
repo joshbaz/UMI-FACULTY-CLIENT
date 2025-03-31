@@ -18,6 +18,19 @@ import {
 import { Icon } from "@iconify-icon/react";
 // import { useGetStudentProposals } from "../../store/tanstackStore/services/queries";
 
+const getCategoryStyle = (status) => {
+  switch (status) {
+    case 'PASSED':
+      return 'text-[#15803D] bg-[#DCFCE7] border border-[#15803D] rounded-md px-2 py-1 text-xs font-medium';
+    case 'FAILED':
+      return 'text-[#DC2626] bg-[#FEE2E2] border border-[#DC2626] rounded-md px-2 py-1 text-xs font-medium';
+    case 'NOT GRADED':
+      return 'text-[#6B7280] bg-[#F3F4F6] border border-[#6B7280] rounded-md px-2 py-1 text-xs font-medium';
+    default:
+      return 'px-2 py-1';
+  }
+};
+
 const StudentProfileProgressProposalTable = ({
   setIsStatusDrawerOpen,
   setSelectedStatus,
@@ -109,14 +122,50 @@ const StudentProfileProgressProposalTable = ({
     }),
     columnHelper.accessor("gradedAt", {
       header: "Graded",
-      cell: (info) =>
-        info.getValue() ? new Date(info.getValue()).toLocaleDateString() : "-",
+      cell: (info) => {
+        const averageMark = info.row.original.averageDefenseMark;
+        let status = 'NOT GRADED';
+        
+        if (averageMark !== null && averageMark !== undefined) {
+          status = averageMark >= 60 ? 'PASSED' : 'FAILED';
+        }
+
+        return (
+          <span className={getCategoryStyle(status)}>
+            {status}
+          </span>
+        );
+      },
     }),
     columnHelper.accessor("grade", {
       header: "Grade",
-      cell: (info) => (
-        <span className="font-medium">{info.getValue() || "Not graded"}</span>
-      ),
+      cell: (info) => {
+        const grade = info.getValue();
+        const averageDefenseMark = info.row.original.averageDefenseMark;
+        const averageReviewMark = info.row.original.averageReviewMark;
+        return (
+          <div className="flex flex-col">
+            {
+              averageDefenseMark || averageReviewMark ? (
+                null
+              ) : (
+                <span className="font-medium">Not graded</span>
+              )
+            }
+           
+            {averageDefenseMark && (
+              <span className="text-xs text-gray-500">
+                Defense: {averageDefenseMark}%
+              </span>
+            )}
+            {averageReviewMark && (
+              <span className="text-xs text-gray-500">
+                Review: {averageReviewMark}%
+              </span>
+            )}
+          </div>
+        );
+      },
     }),
     columnHelper.accessor("submittedBy", {
       header: "Submitted By",
@@ -306,4 +355,4 @@ const StudentProfileProgressProposalTable = ({
   )
 }
 
-export default React.memo(StudentProfileProgressProposalTable);
+export default StudentProfileProgressProposalTable;

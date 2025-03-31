@@ -50,6 +50,20 @@ const SearchInput = memo(({ value, onChange, placeholder }) => (
   />
 ));
 
+
+const getCategoryStyle = (status) => {
+  switch (status) {
+    case 'PASSED':
+      return 'text-[#15803D] bg-[#DCFCE7] border border-[#15803D] rounded-md px-2 py-1 text-xs font-medium';
+    case 'FAILED':
+      return 'text-[#DC2626] bg-[#FEE2E2] border border-[#DC2626] rounded-md px-2 py-1 text-xs font-medium';
+    case 'NOT GRADED':
+      return 'text-[#6B7280] bg-[#F3F4F6] border border-[#6B7280] rounded-md px-2 py-1 text-xs font-medium';
+    default:
+      return 'px-2 py-1';
+  }
+};
+
 const StudentProfileProgressProposalDrawer = ({ isOpen, onClose,   proposalData }) => {
 let {id:studentId} = useParams();
 
@@ -375,9 +389,11 @@ const proposal = useMemo(() => {
                 </div>
 
                 {/* Grade */}
-                <div>
+                <div className="flex flex-col gap-2">
                   <Label className="text-sm font-[Inter-Regular] text-gray-500">Grade</Label>
-                  <p className="text-gray-900 text-base font-[Inter-Regular]">{proposal.grade || "Not graded"}</p>
+                  <span className={getCategoryStyle(proposal.averageDefenseMark >= 60 ? 'PASSED' : proposal.averageDefenseMark ? 'FAILED' : 'NOT GRADED')}>
+                    {proposal.averageDefenseMark ? `${proposal.averageDefenseMark}%` : "Not graded"}
+                  </span>
                 </div>
 
                 {/* Reviewers */}

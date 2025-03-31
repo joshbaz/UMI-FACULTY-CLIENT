@@ -13,9 +13,10 @@ import GradeProposalViewReviewerMark from "./GradeProposalViewReviewerMark";
 import GradeProposalViewPanelistMark from "./GradeProposalViewPanelistMark";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/ui/dialog";
 import { useMutation } from "@tanstack/react-query";
-import { addDefenseDateService, addComplianceReportDateService } from "../../store/tanstackStore/services/api";
+import { addDefenseDateService, addComplianceReportDateService, updateFieldLetterDateService } from "../../store/tanstackStore/services/api";
 import { toast } from "sonner";
 import { queryClient } from "../../utils/tanstack";
+import GradeProposalGenerateFieldLetter from "./GradeProposalGenerateFieldLetter";
 
 const GradeProposal = () => {
   let navigate = useNavigate();
@@ -28,10 +29,12 @@ const GradeProposal = () => {
   const [selectedPanelist, setSelectedPanelist] = useState(null);
   const [isDefenseDateDialogOpen, setIsDefenseDateDialogOpen] = useState(false);
   const [isComplianceReportDialogOpen, setIsComplianceReportDialogOpen] = useState(false);
+  const [isFieldLetterDateDialogOpen, setIsFieldLetterDateDialogOpen] = useState(false);
   const [defenseDate, setDefenseDate] = useState("");
   const [complianceReportDate, setComplianceReportDate] = useState("");
+  const [fieldLetterDate, setFieldLetterDate] = useState("");
   const [isReschedule, setIsReschedule] = useState(false);
-
+  const [isFieldLetterDialogOpen, setIsFieldLetterDialogOpen] = useState(false);
   const { id: proposalId } = useParams();
   const { data: proposal, isPending: isLoading, error, refetch:refetchProposal } = useGetProposal(proposalId);
 
@@ -58,6 +61,19 @@ const GradeProposal = () => {
     },
     onError: (error) => {
       toast.error(error.message || "Failed to update compliance report date");
+    }
+  });
+
+  const updateFieldLetterDateMutation = useMutation({
+    mutationFn: ({ proposalId, fieldLetterDate }) => updateFieldLetterDateService(proposalId, fieldLetterDate),
+    onSuccess: () => {
+      toast.success("Field letter date updated successfully");
+      queryClient.resetQueries({ queryKey: ["proposal", proposalId] });
+      setIsFieldLetterDateDialogOpen(false);
+      setFieldLetterDate("");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update field letter date");
     }
   });
 
@@ -93,6 +109,18 @@ const GradeProposal = () => {
     addComplianceReportDateMutation.mutate({
       proposalId,
       complianceReportDate
+    });
+  };
+
+  const handleFieldLetterDateSubmit = (e) => {
+    e.preventDefault();
+    if (!fieldLetterDate) {
+      toast.error("Please select a field letter date");
+      return;
+    }
+    updateFieldLetterDateMutation.mutate({
+      proposalId,
+      fieldLetterDate
     });
   };
 
@@ -298,9 +326,28 @@ const GradeProposal = () => {
               </span>
               <button 
                 className="px-2 py-1 text-xs font-[Inter-Medium] text-white bg-accent2-600 rounded hover:bg-accent2-700"
-                onClick={() => {/* TODO: Add handler */}}
+                onClick={() => setIsFieldLetterDialogOpen(true)}
               >
                 Generate
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
+              Field Letter Date
+            </h3>
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-[Inter-Regular] text-gray-900">
+                {proposal?.proposal?.fieldLetterDate 
+                  ? format(new Date(proposal.proposal.fieldLetterDate), "dd-MMM-yyyy")
+                  : "Not Available"}
+              </span>
+              <button 
+                className="px-2 py-1 text-xs font-[Inter-Medium] text-white bg-accent2-600 rounded hover:bg-accent2-700"
+                onClick={() => setIsFieldLetterDateDialogOpen(true)}
+              >
+                {proposal?.proposal?.fieldLetterDate ? "Update" : "Add Date"}
               </button>
             </div>
           </div>
@@ -410,6 +457,49 @@ const GradeProposal = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/** Field Letter Date Dialog */}
+      <Dialog open={isFieldLetterDateDialogOpen} onOpenChange={setIsFieldLetterDateDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold leading-6">
+              {proposal?.proposal?.fieldLetterDate ? "Update Field Letter Date" : "Add Field Letter Date"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleFieldLetterDateSubmit} className="grid gap-6 py-4">
+            <div className="grid gap-2">
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Field Letter Date
+              </label>
+              <input
+                type="date"
+                value={fieldLetterDate}
+                onChange={(e) => setFieldLetterDate(e.target.value)}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+            <DialogFooter>
+              <button
+                type="button"
+                onClick={() => setIsFieldLetterDateDialogOpen(false)}
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={updateFieldLetterDateMutation.isPending}
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+              >
+                {updateFieldLetterDateMutation.isPending ? "Saving..." : "Save"}
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/** Field Letter Dialog */}
+      <GradeProposalGenerateFieldLetter isOpen={isFieldLetterDialogOpen} onClose={() => setIsFieldLetterDialogOpen(false)} proposalId={proposalId} proposal={proposal?.proposal} />
     </div>  
   );
 };

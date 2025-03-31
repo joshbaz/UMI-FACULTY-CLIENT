@@ -224,7 +224,7 @@ const StudentProfileProgressPage = ({ studentData }) => {
           Timeline (Days)
         </h3>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col ">
           {/* Expected Completion Date Indicator */}
           {studentData?.student?.expectedCompletionDate && (
             <div className="relative h-6 mb-1">

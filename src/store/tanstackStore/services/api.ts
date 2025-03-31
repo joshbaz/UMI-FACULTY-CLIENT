@@ -231,3 +231,28 @@ export const addPanelistMarkService = async (proposalId: string, panelistId: str
 }
 
 /* ********** END OF REVIEWER MARK MANAGEMENT ********** */
+
+/* ********** FIELD LETTER MANAGEMENT ********** */
+
+export const generateFieldLetterService = async (proposalId: string, formData: FormData) => {
+    try {
+        const response = await apiRequest.post(`/faculty/generate-field-letter/${proposalId}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+export const updateFieldLetterDateService = async (proposalId: string, fieldLetterDate: string) => {
+    try {
+        const response = await apiRequest.put(`/faculty/update-field-letter-date/${proposalId}`, { fieldLetterDate })
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}
+/* ********** END OF FIELD LETTER MANAGEMENT ********** */
