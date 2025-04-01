@@ -109,14 +109,18 @@ const GradeManagement = () => {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 px-6">
         <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
-          <p className=" text-3xl font-[Inter-Medium]">45</p>
+          <p className="text-3xl font-[Inter-Medium]">
+            {proposalsData?.proposals?.length || 0}
+          </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             Proposals Submitted
           </h3>
         </div>
 
         <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
-          <p className="mt-2 text-3xl font-[Inter-Medium]">14</p>
+          <p className="text-3xl font-[Inter-Medium]">
+            {proposalsData?.proposals?.filter(proposal => proposal.status === "passed-proposal graded")?.length || 0}
+          </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             <div className="flex items-center gap-1">
               Status: Proposal Graded - Passed
@@ -135,7 +139,9 @@ const GradeManagement = () => {
         </div>
 
         <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
-          <p className="mt-2 text-3xl font-[Inter-Medium]">26</p>
+          <p className="text-3xl font-[Inter-Medium]">
+            {proposalsData?.proposals?.filter(proposal => proposal.status === "Failed")?.length || 0}
+          </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             <div className="flex items-center gap-1">
               Status: Proposal Graded - Failed

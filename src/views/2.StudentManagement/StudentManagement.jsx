@@ -106,21 +106,25 @@ const StudentManagement = () => {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 px-6">
         <div className="bg-white p-4 rounded-lg shadow-md">
-          <p className="mt-2 text-3xl font-[Inter-Medium]">100,000</p>
+          <p className="mt-2 text-3xl font-[Inter-Medium]">{studentsData?.students?.length || 0}</p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             Total Students
           </h3>
         </div>
 
         <div className="bg-white p-4 rounded-lg shadow-md">
-          <p className="mt-2 text-3xl font-[Inter-Medium]">45</p>
+          <p className="mt-2 text-3xl font-[Inter-Medium]">
+            {studentsData?.students?.filter(student => student.isActive)?.length || 0}
+          </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             Active Students
           </h3>
         </div>
 
         <div className="bg-white p-4 rounded-lg shadow-md">
-          <p className="mt-2 text-3xl font-[Inter-Medium]">14</p>
+          <p className="mt-2 text-3xl font-[Inter-Medium]">
+            {studentsData?.students?.filter(student => student.status === "Workshop")?.length || 0}
+          </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             <div className="flex items-center gap-1">
               Status: Workshop
@@ -139,7 +143,9 @@ const StudentManagement = () => {
         </div>
 
         <div className="bg-white p-4 rounded-lg shadow-md">
-          <p className="mt-2 text-3xl font-[Inter-Medium]">26</p>
+          <p className="mt-2 text-3xl font-[Inter-Medium]">
+            {studentsData?.students?.filter(student => student.status === "Normal Progress")?.length || 0}
+          </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             <div className="flex items-center gap-1">
               Status: Normal Progress

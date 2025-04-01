@@ -13,6 +13,8 @@ import StudentProfile from "./views/2.StudentManagement/StudentProfile";
 import GradeManagement from "./views/3.GradeManagement/GradeManagement";
 import SubmitStudentProposal from "./views/2.StudentManagement/StudentSubmitProposal";
 import GradeProposal from "./views/3.GradeManagement/GradeProposal";
+import NotificationsManagement from "./views/4.Notifications/NotificationsManagement";
+import Settings from "./views/5.Settings/Settings";
 function App() {
   return (
     <>
@@ -28,6 +30,8 @@ function App() {
 
             <Route path="grades" element={<GradeManagement />} />
             <Route path="grades/proposal/:id" element={<GradeProposal />} />
+            <Route path="notifications" element={<NotificationsManagement />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
           <Route  element={<OrdinaryRoutes />}>
             <Route path="/login" element={<Login />} />
