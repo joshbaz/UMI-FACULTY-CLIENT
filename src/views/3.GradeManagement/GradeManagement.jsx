@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { format } from "date-fns";
-import { useGetSchoolProposals } from "../../store/tanstackStore/services/queries";
+import { useGetSchoolProposals, useGetAllBooks } from "../../store/tanstackStore/services/queries";
 import { Loader2, Search } from "lucide-react";
 import {
   Tooltip,
@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/tooltip";
 import { InfoIcon } from "lucide-react";
 import GradeManagementTableTabs from "./GradeManagementTableTabs";
-import GradeManagementTable from "./GradeManagementProposalTable";
 import GradeManagementBookTable from "./GradeManagementBookTable";
 import GradeManagementProposalTable from "./GradeManagementProposalTable";
 
@@ -25,8 +24,8 @@ const GradeManagement = () => {
   // Get all proposals
   const { data: proposalsData, isLoading, error } = useGetSchoolProposals();
 
-  // Get the correct data based on active tab
- 
+  // Get all books
+  const { data: booksData, isLoading: isLoadingBooks, error: errorBooks } = useGetAllBooks();
 
   // Filter data based on search
   const filteredProposals = useMemo(() => {
@@ -45,39 +44,52 @@ const GradeManagement = () => {
     );
   }, [proposalsData?.proposals, activeTab, searchTerm]);
 
+  // Filter books based on search
+  const filteredBooks = useMemo(() => {
+    return (booksData?.books || []).filter(
+      (book) =>
+        activeTab === "Book Examination" &&
+        (book?.title
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+          book?.author
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()))
+    );
+  }, [booksData?.books, activeTab, searchTerm]);
+
   // Pagination logic
   const startIndex = (currentPage - 1) * pageSize;
-  const paginatedData = filteredProposals.slice(
-    startIndex,
-    startIndex + pageSize
-  );
+  const paginatedData = activeTab === "Proposal Grading" 
+    ? filteredProposals.slice(startIndex, startIndex + pageSize)
+    : filteredBooks.slice(startIndex, startIndex + pageSize);
 
   // Reset pagination when switching tabs
   useEffect(() => {
     setCurrentPage(1);
   }, [activeTab]);
 
-  if (isLoading) {
+  if (isLoading || isLoadingBooks) {
     return (
       <div className="flex items-center justify-center h-screen gap-2">
         <Loader2 className="h-4 w-4 animate-spin text-green-900" />
         <div className="text-lg font-[Inter-Medium] text-gray-600">
-          {" "}
           Loading grading data...
         </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error || errorBooks) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-lg font-[Inter-Medium] text-red-600">
-          Error: {error.message}
+          Error: {(error || errorBooks)?.message}
         </div>
       </div>
     );
   }
+
   return (
     <div className="space-y-6">
       {/* Top Search Bar */}
@@ -90,10 +102,10 @@ const GradeManagement = () => {
           />
           <input
             type="text"
-            placeholder="Search by Name"
+            placeholder={activeTab === "Proposal Grading" ? "Search by Student Name" : "Search by Book Title"}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-semantic-surface text-sm font-[Inter-Regular]  border border-semantic-bg-border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-200"
+            className="w-full pl-10 pr-4 py-2 bg-semantic-surface text-sm font-[Inter-Regular] border border-semantic-bg-border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-200"
           />
         </div>
       </div>
@@ -110,27 +122,31 @@ const GradeManagement = () => {
       <div className="grid grid-cols-3 gap-4 px-6">
         <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
           <p className="text-3xl font-[Inter-Medium]">
-            {proposalsData?.proposals?.length || 0}
+            {activeTab === "Proposal Grading" 
+              ? proposalsData?.proposals?.length || 0
+              : booksData?.books?.length || 0}
           </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
-            Proposals Submitted
+            {activeTab === "Proposal Grading" ? "Proposals Submitted" : "Books Submitted"}
           </h3>
         </div>
 
         <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
           <p className="text-3xl font-[Inter-Medium]">
-            {proposalsData?.proposals?.filter(proposal => proposal.status === "passed-proposal graded")?.length || 0}
+            {activeTab === "Proposal Grading"
+              ? proposalsData?.proposals?.filter(proposal => proposal.status === "passed-proposal graded")?.length || 0
+              : booksData?.books?.filter(book => book.status === "passed")?.length || 0}
           </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             <div className="flex items-center gap-1">
-              Status: Proposal Graded - Passed
+              Status: {activeTab === "Proposal Grading" ? "Proposal" : "Book"} Graded - Passed
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
                     <InfoIcon className="h-4 w-4" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Proposal Graded - Passed</p>
+                    <p>{activeTab === "Proposal Grading" ? "Proposal" : "Book"} Graded - Passed</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -140,18 +156,20 @@ const GradeManagement = () => {
 
         <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
           <p className="text-3xl font-[Inter-Medium]">
-            {proposalsData?.proposals?.filter(proposal => proposal.status === "Failed")?.length || 0}
+            {activeTab === "Proposal Grading"
+              ? proposalsData?.proposals?.filter(proposal => proposal.status === "Failed")?.length || 0
+              : booksData?.books?.filter(book => book.status === "failed")?.length || 0}
           </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             <div className="flex items-center gap-1">
-              Status: Proposal Graded - Failed
+              Status: {activeTab === "Proposal Grading" ? "Proposal" : "Book"} Graded - Failed
               <TooltipProvider className="z-[9999] h-full">
                 <Tooltip>
                   <TooltipTrigger>
                     <InfoIcon className="h-4 w-4" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Proposal Graded - Failed</p>
+                    <p>{activeTab === "Proposal Grading" ? "Proposal" : "Book"} Graded - Failed</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -178,7 +196,14 @@ const GradeManagement = () => {
               totalCount={filteredProposals.length}
             />
           ) : activeTab === "Book Examination" ? (
-            <GradeManagementBookTable />
+            <GradeManagementBookTable 
+              data={paginatedData}
+              pageSize={pageSize}
+              setPageSize={setPageSize}
+              currentPage={currentPage} 
+              setCurrentPage={setCurrentPage}
+              totalCount={filteredBooks.length}
+            />
           ) : null}
         </div>
       </div>

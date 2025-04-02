@@ -256,3 +256,116 @@ export const updateFieldLetterDateService = async (proposalId: string, fieldLett
     }
 }
 /* ********** END OF FIELD LETTER MANAGEMENT ********** */
+
+/* ********** EXAMINER MANAGEMENT ********** */
+
+export const createExaminerService = async (examinerData: any) => {
+    try {
+        const response = await apiRequest.post('/faculty/examiners', examinerData);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+export const getAllExaminersService = async () => {
+    try {
+        const response = await apiRequest.get('/faculty/examiners');
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+export const getExaminerService = async (examinerId: string) => {
+    try {
+        const response = await apiRequest.get(`/faculty/examiners/${examinerId}`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+export const updateExaminerService = async (examinerId: string, examinerData: any) => {
+    try {
+        const response = await apiRequest.put(`/faculty/examiners/${examinerId}`, examinerData);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+export const deleteExaminerService = async (examinerId: string) => {
+    try {
+        const response = await apiRequest.delete(`/faculty/examiners/${examinerId}`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+/* ********** EXAMINER ASSIGNMENT MANAGEMENT ********** */
+
+export const assignExaminersToBookService = async (bookId: string, examinerIds: string[], assignmentDate: string) => {
+    try {
+        const response = await apiRequest.post(`/faculty/books/${bookId}/examiners`, {
+            examinerIds,
+            assignmentDate
+        });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+export const updateInternalExaminerMarkService = async (assignmentId: string, mark: number, comments: string) => {
+    try {
+        const response = await apiRequest.put(`/faculty/internal-examiner-mark/${assignmentId}`, {
+            mark,
+            comments
+        });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+
+
+/* ********** END OF EXAMINER MANAGEMENT ********** */
+
+/* ********** BOOK MANAGEMENT ********** */
+
+export const getAllBooksService = async () => {
+  try {
+    const response = await apiRequest.get('/faculty/books');
+    return response.data;
+  } catch (error) {
+    errorHandling(error);
+  }
+}
+
+export const getBookService = async (bookId: string) => {
+  try {
+    const response = await apiRequest.get(`/faculty/books/${bookId}`);
+    return response.data;
+  } catch (error) {
+    errorHandling(error);
+  }
+}
+
+export const getStudentBooksService = async (studentId: string) => {
+  try {
+    const response = await apiRequest.get(`/faculty/students/${studentId}/books`);
+    return response.data;
+  } catch (error) {
+    errorHandling(error);
+  }
+}
+
+
+
+
+
+/* ********** END OF BOOK MANAGEMENT ********** */
+

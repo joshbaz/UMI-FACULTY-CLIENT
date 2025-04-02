@@ -15,6 +15,8 @@ import SubmitStudentProposal from "./views/2.StudentManagement/StudentSubmitProp
 import GradeProposal from "./views/3.GradeManagement/GradeProposal";
 import NotificationsManagement from "./views/4.Notifications/NotificationsManagement";
 import Settings from "./views/5.Settings/Settings";
+import GradeBook from "./views/3.GradeManagement/GradeBook";
+import GradeBookAddInternalExaminer from "./views/3.GradeManagement/GradeBookAddInternalExaminer";
 function App() {
   return (
     <>
@@ -30,6 +32,8 @@ function App() {
 
             <Route path="grades" element={<GradeManagement />} />
             <Route path="grades/proposal/:id" element={<GradeProposal />} />
+            <Route path="grades/book/:id" element={<GradeBook />} />
+            <Route path="grades/book/add-internal-examiner/:id" element={<GradeBookAddInternalExaminer />} />
             <Route path="notifications" element={<NotificationsManagement />} />
             <Route path="settings" element={<Settings />} />
           </Route>

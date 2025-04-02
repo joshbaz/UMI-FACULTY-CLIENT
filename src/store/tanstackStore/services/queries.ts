@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals } from './api.js';
+import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals, getAllExaminersService, getExaminerService, getBookService, getStudentBooksService, getAllBooksService, } from './api.js';
 
 // Common options for most queries
 function getDefaultQueryOptions() {
@@ -119,4 +119,61 @@ export function useGetPanelists() {
   });
 }
 
+
+
 /* ********** END OF PANELIST MANAGEMENT ********** */
+
+
+/* ********** EXAMINER MANAGEMENT ********** */
+export function useGetAllExaminers() {
+  return useQuery({
+    queryKey: ['examiners'],
+    queryFn: getAllExaminersService,
+    staleTime: Infinity,
+    refetchInterval: false,
+    networkMode: 'online',  
+  });
+}
+
+export function useGetExaminer(examinerId: string) {
+  return useQuery({
+    queryKey: ['examiner', examinerId],
+    queryFn: () => getExaminerService(examinerId),
+    staleTime: Infinity,
+    refetchInterval: false,
+    networkMode: 'online',
+    enabled: !!examinerId,
+  });
+}
+
+export function useGetAllBooks() {
+  return useQuery({
+    queryKey: ['books'],
+    queryFn: getAllBooksService,
+    staleTime: Infinity,
+    refetchInterval: false,
+    networkMode: 'online',
+  });
+}
+
+export function useGetBook(bookId: string) {
+  return useQuery({
+    queryKey: ['book', bookId],
+    queryFn: () => getBookService(bookId),
+    staleTime: Infinity,
+    refetchInterval: false,
+    networkMode: 'online',
+    enabled: !!bookId,
+  });
+}
+
+export function useGetStudentBooks(studentId: string) {
+  return useQuery({
+    queryKey: ['studentBooks', studentId],
+    queryFn: () => getStudentBooksService(studentId),
+    staleTime: Infinity,
+    refetchInterval: false,
+    networkMode: 'online',
+    enabled: !!studentId,
+  });
+}
