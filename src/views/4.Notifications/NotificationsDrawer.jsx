@@ -105,7 +105,7 @@ const NotificationDrawer = ({ isOpen, onClose, notificationId }) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity" />
+          <div className="fixed inset-0 bg-gray-900/50 transition-opacity" />
         </Transition.Child>
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">

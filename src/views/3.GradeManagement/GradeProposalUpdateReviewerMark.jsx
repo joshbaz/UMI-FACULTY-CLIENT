@@ -16,14 +16,31 @@ import { format } from "date-fns";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { addReviewerMarkService } from "../../store/tanstackStore/services/api"; // Import the service
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+// Defense verdict options
+const REVIEWER_VERDICTS = {
+  PASS: 'PASS',
+  PASS_WITH_MINOR_CORRECTIONS: 'PASS_WITH_MINOR_CORRECTIONS',
+  PASS_WITH_MAJOR_CORRECTIONS: 'PASS_WITH_MAJOR_CORRECTIONS',
+  FAIL: 'FAIL',
+ 
+};
 
 const validationSchema = Yup.object({
-  mark: Yup.number()
-    .required("Mark is required")
-    .min(0, "Mark must be at least 0")
-    .max(100, "Mark cannot exceed 100"),
+  verdict: Yup.string()
+    .required("Verdict is required")
+    .oneOf(Object.values(REVIEWER_VERDICTS), "Invalid verdict"),
   comments: Yup.string().required("Comments are required"),
 });
+
+
 
 const GradeProposalUpdateReviewerMark = ({
   isOpen,
@@ -37,7 +54,7 @@ const GradeProposalUpdateReviewerMark = ({
 
   
   const initialValues = {
-    mark: "",
+    verdict: "",
     comments: "",
   };
 
@@ -46,13 +63,13 @@ const GradeProposalUpdateReviewerMark = ({
       (grade) => grade.gradedById === reviewer?.id
     );
     if (existingGrade) {
-      initialValues.mark = existingGrade.grade.toString();
+      initialValues.verdict = existingGrade.verdict || "";
       initialValues.comments = existingGrade.feedback || "";
     }
   }, [reviewer, proposal?.reviewGrades]);
 
   const submitGradeMutation = useMutation({
-    mutationFn: async (gradeData) => addReviewerMarkService(gradeData.proposalId, gradeData.gradedById, gradeData.grade, gradeData.feedback)
+    mutationFn: async (gradeData) => addReviewerMarkService(gradeData.proposalId, gradeData.gradedById, gradeData.verdict, gradeData.feedback)
     ,
     onSuccess: () => {
       queryClient.resetQueries({ queryKey: ["proposal", proposalId] });
@@ -78,7 +95,7 @@ const GradeProposalUpdateReviewerMark = ({
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["proposal", proposalId]);
+      queryClient.resetQueries({ queryKey: ["proposal", proposalId] });
       onClose();
     },
   });
@@ -86,7 +103,7 @@ const GradeProposalUpdateReviewerMark = ({
   const handleSubmit = (values) => {
     const gradeData = {
       proposalId,
-      grade: parseFloat(values.mark),
+      verdict: values.verdict,
       feedback: values.comments,
       gradedById: reviewer.id,
       submittedById: facultyData?.faculty?.id,
@@ -130,7 +147,7 @@ const GradeProposalUpdateReviewerMark = ({
           onSubmit={handleSubmit}
           enableReinitialize
         >
-          {({ errors, touched, isSubmitting }) => (
+          {({ errors, touched, isSubmitting, setFieldValue, values }) => (
             <Form className="p-6 space-y-6">
               {/* Reviewer Info */}
               <div className="flex items-center gap-3">
@@ -147,34 +164,29 @@ const GradeProposalUpdateReviewerMark = ({
                 </div>
               </div>
 
-              {/* Mark Range */}
+              {/* Verdict Selection */}
               <div className="space-y-2">
                 <Label className="text-sm font-[Inter-Regular] text-gray-800">
-                  Mark Range
+                  Verdict
                 </Label>
-                <div className="relative">
-                  <Field
-                    as={Input}
-                    type="number"
-                    name="mark"
-                    min="0"
-                    max="100"
-                    placeholder="0"
-                    className="w-full pr-8 text-sm  !ring-0 
-    !ring-offset-0 
-    !outline-none
-    focus:!ring-0 
-    focus:!outline-none
-    focus-visible:!ring-0 
-    focus-visible:!outline-none 
-    focus:border-gray-300 font-[Inter-Regular] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none "
-                  />
-                  <div className="absolute right-[1px] top-[1px] bottom-[1px] bg-primary-100 flex items-center px-3 rounded-r-[7px]">
-                    <Percent className="w-4 h-4 text-gray-400" />
-                  </div>
-                </div>
-                {errors.mark && touched.mark && (
-                  <div className="text-red-500 text-sm">{errors.mark}</div>
+                <Select
+                  name="verdict"
+                  value={values.verdict}
+                  onValueChange={(value) => setFieldValue("verdict", value)}
+                >
+                  <SelectTrigger className="w-full text-sm font-[Inter-Regular]">
+                    <SelectValue placeholder="Select a verdict" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(REVIEWER_VERDICTS).map(([key, value]) => (
+                      <SelectItem key={key} value={value}>
+                        {value.replace(/_/g, ' ')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.verdict && touched.verdict && (
+                  <div className="text-red-500 text-sm">{errors.verdict}</div>
                 )}
               </div>
 

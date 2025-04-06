@@ -23,12 +23,18 @@ import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { addReviewerMarkService } from "../../store/tanstackStore/services/api";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+// Reviewer verdict options
+const REVIEWER_VERDICTS = {
+  PASS: 'PASS',
+  PASS_WITH_MINOR_CORRECTIONS: 'PASS_WITH_MINOR_CORRECTIONS',
+  PASS_WITH_MAJOR_CORRECTIONS: 'PASS_WITH_MAJOR_CORRECTIONS',
+  FAIL: 'FAIL',
+};
 
 const validationSchema = Yup.object({
-  mark: Yup.number()
-    .required("Mark is required")
-    .min(0, "Mark must be at least 0")
-    .max(100, "Mark cannot exceed 100"),
+  verdict: Yup.string().required("Verdict is required"),
   comments: Yup.string().required("Comments are required"),
 });
 
@@ -48,14 +54,14 @@ const GradeProposalViewReviewerMark = ({
   );
 
   const initialValues = {
-    mark: existingGrade?.grade?.toString() || "",
+    verdict: existingGrade?.verdict || "",
     comments: existingGrade?.feedback || "",
   };
 
   const submitGradeMutation = useMutation({
-    mutationFn: async (gradeData) => addReviewerMarkService(gradeData.proposalId, gradeData.gradedById, gradeData.grade, gradeData.feedback),
+    mutationFn: async (gradeData) => addReviewerMarkService(gradeData.proposalId, gradeData.reviewerId, gradeData.verdict, gradeData.feedback),
     onSuccess: (data) => {
-        toast.success(data.message);
+      toast.success(data.message);
       queryClient.resetQueries({ queryKey: ["proposal", proposalId] });
       setIsEditModalOpen(false);
     },
@@ -87,20 +93,31 @@ const GradeProposalViewReviewerMark = ({
   const handleSubmit = (values) => {
     const gradeData = {
       proposalId,
-      grade: parseFloat(values.mark),
+      verdict: values.verdict,
       feedback: values.comments,
-      gradedById: reviewer.id,
+      reviewerId: reviewer.id,
       submittedById: facultyData?.faculty?.id,
     };
 
     if (existingGrade) {
-    //   updateGradeMutation.mutate({
-    //     ...gradeData,
-    //     id: existingGrade.id,
-    //   });
-    submitGradeMutation.mutate(gradeData);
+      submitGradeMutation.mutate(gradeData);
     } else {
       submitGradeMutation.mutate(gradeData);
+    }
+  };
+
+  const getVerdictLabel = (verdict) => {
+    switch (verdict) {
+      case 'PASS':
+        return 'Pass';
+      case 'PASS_WITH_MINOR_CORRECTIONS':
+        return 'Pass with Minor Corrections';
+      case 'PASS_WITH_MAJOR_CORRECTIONS':
+        return 'Pass with Major Corrections';
+      case 'FAIL':
+        return 'Fail';
+      default:
+        return 'Not Specified';
     }
   };
 
@@ -139,13 +156,13 @@ const GradeProposalViewReviewerMark = ({
               </div>
             </div>
 
-            {/* Mark */}
+            {/* Verdict */}
             <div className="space-y-2">
               <Label className="text-sm font-[Inter-Regular] text-gray-800">
-                Mark
+                Verdict
               </Label>
-              <div className="text-2xl font-[Inter-Medium]">
-                {existingGrade?.grade}%
+              <div className="text-lg font-[Inter-Medium]">
+                {existingGrade?.verdict ? getVerdictLabel(existingGrade.verdict) : "Not specified"}
               </div>
             </div>
 
@@ -159,19 +176,7 @@ const GradeProposalViewReviewerMark = ({
               </div>
             </div>
 
-            {/* Last Update Info */}
-            <div className="flex items-center gap-2 text-sm font-[Inter-Regular] text-gray-500">
-              <span>
-                Last Update:{" "}
-                {existingGrade?.updatedAt
-                  ? format(new Date(existingGrade.updatedAt), "MM/dd/yyyy hh:mm:ss aa")
-                  : format(new Date(), "MM/dd/yyyy hh:mm:ss aa")}
-              </span>
-              <span>•</span>
-              <span>
-                Updated by {existingGrade?.submittedBy?.name || "DHIMS System"}
-              </span>
-            </div>
+         
 
             {/* Edit Button */}
             <Button
@@ -197,29 +202,31 @@ const GradeProposalViewReviewerMark = ({
             onSubmit={handleSubmit}
             enableReinitialize
           >
-            {({ errors, touched, isSubmitting }) => (
+            {({ errors, touched, isSubmitting, setFieldValue, values }) => (
               <Form className="space-y-6">
-                {/* Mark Range */}
+                {/* Verdict Selection */}
                 <div className="space-y-2">
                   <Label className="text-sm font-[Inter-Regular] text-gray-800">
-                    Mark Range
+                    Verdict
                   </Label>
-                  <div className="relative">
-                    <Field
-                      as={Input}
-                      type="number"
-                      name="mark"
-                      min="0"
-                      max="100"
-                      placeholder="0"
-                      className="w-full pr-8 text-sm !ring-0 !ring-offset-0 !outline-none"
-                    />
-                    <div className="absolute right-[1px] top-[1px] bottom-[1px] bg-primary-100 flex items-center px-3 rounded-r-[7px]">
-                      <Percent className="w-4 h-4 text-gray-400" />
-                    </div>
-                  </div>
-                  {errors.mark && touched.mark && (
-                    <div className="text-red-500 text-sm">{errors.mark}</div>
+                  <Select
+                    name="verdict"
+                    value={values.verdict}
+                    onValueChange={(value) => setFieldValue("verdict", value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a verdict" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(REVIEWER_VERDICTS).map(([key, value]) => (
+                        <SelectItem key={key} value={value}>
+                          {getVerdictLabel(value)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.verdict && touched.verdict && (
+                    <div className="text-red-500 text-sm">{errors.verdict}</div>
                   )}
                 </div>
 

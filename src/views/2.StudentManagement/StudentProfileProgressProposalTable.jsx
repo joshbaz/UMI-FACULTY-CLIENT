@@ -46,6 +46,8 @@ const StudentProfileProgressProposalTable = ({
   const [pageIndex, setPageIndex] = useState(0);
 //   const { data: proposals, isLoading: isLoadingProposals } = useGetStudentProposals(id);
 
+console.log('proposals',proposals);
+
   const columnHelper = createColumnHelper();
 
   const handleStatusClick = useCallback((rowData) => {
@@ -124,11 +126,22 @@ const StudentProfileProgressProposalTable = ({
     columnHelper.accessor("gradedAt", {
       header: "Graded",
       cell: (info) => {
-        const averageMark = info.row.original.averageDefenseMark;
+        const defenses = info.row.original.defenses || [];
         let status = 'NOT GRADED';
         
-        if (averageMark !== null && averageMark !== undefined) {
-          status = averageMark >= 60 ? 'PASSED' : 'FAILED';
+        // Find the current defense if it exists
+        const currentDefense = defenses.find(defense => defense.isCurrent);
+        
+        if (currentDefense && currentDefense.verdict) {
+          if (currentDefense.verdict.toLowerCase().includes('pass')) {
+            status = 'PASSED';
+          } else if (currentDefense.verdict.toLowerCase().includes('fail')) {
+            status = 'FAILED';
+          }
+        } else if (info.row.original.averageDefenseMark !== null && 
+                  info.row.original.averageDefenseMark !== undefined) {
+          // Fallback to the average mark if no verdict is found
+          status = info.row.original.averageDefenseMark >= 60 ? 'PASSED' : 'FAILED';
         }
 
         return (
@@ -139,30 +152,19 @@ const StudentProfileProgressProposalTable = ({
       },
     }),
     columnHelper.accessor("grade", {
-      header: "Grade",
+      header: "Verdict",
       cell: (info) => {
-        const grade = info.getValue();
-        const averageDefenseMark = info.row.original.averageDefenseMark;
-        const averageReviewMark = info.row.original.averageReviewMark;
+        const defenses = info.row.original.defenses || [];
+        const currentDefense = defenses.find(defense => defense.isCurrent);
+        
         return (
           <div className="flex flex-col">
-            {
-              averageDefenseMark || averageReviewMark ? (
-                null
-              ) : (
-                <span className="font-medium">Not graded</span>
-              )
-            }
-           
-            {averageDefenseMark && (
-              <span className="text-xs text-gray-500">
-                Defense: {averageDefenseMark}%
+            {currentDefense?.verdict ? (
+              <span className="text-xs font-medium text-gray-700">
+                {currentDefense.verdict}
               </span>
-            )}
-            {averageReviewMark && (
-              <span className="text-xs text-gray-500">
-                Review: {averageReviewMark}%
-              </span>
+            ) : (
+              <span className="font-medium">No verdict yet</span>
             )}
           </div>
         );

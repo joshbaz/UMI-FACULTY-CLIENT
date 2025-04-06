@@ -317,12 +317,12 @@ const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, revi
       },
     },
     {
-      header: 'Marks',
-      accessorKey: 'grade',
+      header: 'Verdict',
+      accessorKey: 'verdict',
       cell: (info) => {
         const reviewerId = info.row.original.id;
         const grade = reviewGrades.find(grade => grade.gradedById === reviewerId);
-        return grade ? `${grade.grade}%` : '-';
+        return grade ? `${grade.verdict}` : '-';
       },
     },
     {
@@ -549,7 +549,7 @@ const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, revi
 
       {/* Reviewer Modal */}
       <Dialog open={isReviewerModalOpen} onOpenChange={setIsReviewerModalOpen}>
-        <DialogContent className="max-w-[80vh] max-h-[90vh]">
+        <DialogContent className="max-w-[80vh] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add Reviewer</DialogTitle>
           </DialogHeader>

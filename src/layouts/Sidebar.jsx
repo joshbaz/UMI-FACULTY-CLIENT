@@ -35,6 +35,11 @@ const Sidebar = () => {
       path: "/notifications",
     },
     {
+      label: "Faculty Statistics",
+      icon: "material-symbols:analytics",
+      path: "/statistics",
+    },
+    {
       label: "Settings",
       icon: "material-symbols:manufacturing",
       path: "/settings",

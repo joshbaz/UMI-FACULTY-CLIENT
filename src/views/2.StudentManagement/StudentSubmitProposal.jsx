@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import { useMutation } from '@tanstack/react-query';
 import { submitProposalService } from '../../store/tanstackStore/services/api';
 import { toast } from 'sonner';
+import { queryClient } from '../../utils/tanstack';
 
 const validationSchema = Yup.object().shape({
   title: Yup.string()
@@ -14,11 +15,11 @@ const validationSchema = Yup.object().shape({
     .required('Submission date is required'),
   researchArea: Yup.string()
     .required('Research area is required'),
-  file: Yup.mixed()
-    .test('fileSize', 'File size must be less than 500MB', value => {
-      if (!value) return true;
-      return value.size <= 500 * 1024 * 1024;
-    })
+  // file: Yup.mixed()
+  //   .test('fileSize', 'File size must be less than 500MB', value => {
+  //     if (!value) return true;
+  //     return value.size <= 500 * 1024 * 1024;
+  //   })
 });
 
 const SubmitStudentProposal = () => {
@@ -34,6 +35,9 @@ let navigate = useNavigate();
           onClick: () => toast.dismiss()
         }
       });
+
+      navigate(`/students/profile/${id}`);
+      queryClient.resetQueries({ queryKey: ['student', id] });
     },
     onError: (error) => {
       toast.error( error?.message, {
@@ -80,7 +84,7 @@ let navigate = useNavigate();
             formData.append('description', values.description);
             formData.append('submissionDate', values.submissionDate);
             formData.append('researchArea', values.researchArea);
-            formData.append('proposalFile', values.file);
+            // formData.append('proposalFile', values.file);
             submitProposalMutation.mutate(formData);
             // console.log('Proposal submitted successfully')
           }}
@@ -149,7 +153,7 @@ let navigate = useNavigate();
                 )}
               </div>
 
-              <div>
+              {/* <div>
                 <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-1">
                   Upload Proposal Document
                 </label>
@@ -171,7 +175,7 @@ let navigate = useNavigate();
                 {errors.file && touched.file && (
                     <div className="text-red-500 text-sm mt-1">{errors.file}</div>
                   )}
-              </div>
+              </div> */}
 
               <div className="flex justify-end">
                 <button

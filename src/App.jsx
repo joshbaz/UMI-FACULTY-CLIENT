@@ -17,6 +17,7 @@ import NotificationsManagement from "./views/4.Notifications/NotificationsManage
 import Settings from "./views/5.Settings/Settings";
 import GradeBook from "./views/3.GradeManagement/GradeBook";
 import GradeBookAddInternalExaminer from "./views/3.GradeManagement/GradeBookAddInternalExaminer";
+import FacultyStatsManagement from "./views/6.FacultyStatistics/FacultyStatsManagement";
 function App() {
   return (
     <>
@@ -35,6 +36,7 @@ function App() {
             <Route path="grades/book/:id" element={<GradeBook />} />
             <Route path="grades/book/add-internal-examiner/:id" element={<GradeBookAddInternalExaminer />} />
             <Route path="notifications" element={<NotificationsManagement />} />
+            <Route path="statistics" element={<FacultyStatsManagement />} />
             <Route path="settings" element={<Settings />} />
           </Route>
           <Route  element={<OrdinaryRoutes />}>

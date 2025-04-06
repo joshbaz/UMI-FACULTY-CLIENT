@@ -172,6 +172,15 @@ export const deleteReviewerService = async (proposalId: string, reviewerId: stri
     }
 }
 
+export const addNewPanelistService = async (data: any) => {
+    try {
+        const response = await apiRequest.post('/faculty/panelists', data);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
 
 
 /* ********** END OF REVIEWER MANAGEMENT ********** */
@@ -210,9 +219,9 @@ export const deletePanelistService = async (proposalId: string, panelistId: stri
 
 /* ********** REVIEWER MARK MANAGEMENT ********** */
 
-export const addReviewerMarkService = async (proposalId: string, reviewerId: string, grade: number, feedback: string) => {
+export const addReviewerMarkService = async (proposalId: string, reviewerId: string, verdict: string, feedback: string) => {
     try {
-        const response = await apiRequest.post(`/faculty/reviewer-marks/${proposalId}/${reviewerId}`, { grade, feedback })
+        const response = await apiRequest.post(`/faculty/reviewer-marks/${proposalId}/${reviewerId}`, { verdict, feedback })
         return response.data
     } catch (error) {
         errorHandling(error)
@@ -416,4 +425,45 @@ export const getNotificationsService = async () => {
         errorHandling(error);
     }
 }
+
+
+/* ********** PROPOSAL DEFENSE MANAGEMENT ********** */
+
+export const scheduleProposalDefenseService = async (proposalId: string, scheduledDate: string, panelistIds: any) => {
+    try {
+        const response = await apiRequest.post(`/faculty/proposals/${proposalId}/defenses`, { scheduledDate, panelistIds });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+export const recordProposalDefenseVerdictService = async (defenseId: string, verdict: string, comments: string) => {
+    try {
+        const response = await apiRequest.put(`/faculty/defenses/${defenseId}`, { verdict, comments });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+export const getProposalDefensesService = async () => {
+    try {
+        const response = await apiRequest.get('/faculty/defenses');
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+/* ********** END OF PROPOSAL DEFENSE MANAGEMENT ********** */
+
+export const getAllSupervisorsService = async () => {
+    try {
+        const response = await apiRequest.get('/faculty/supervisors');
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
 

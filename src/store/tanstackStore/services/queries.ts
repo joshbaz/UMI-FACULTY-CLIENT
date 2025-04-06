@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals, getAllExaminersService, getExaminerService, getBookService, getStudentBooksService, getAllBooksService, getProgressTrendsService, getStatusStatisticsService, getDashboardStatsService, getNotificationsService, } from './api.js';
+import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals, getAllExaminersService, getExaminerService, getBookService, getStudentBooksService, getAllBooksService, getProgressTrendsService, getStatusStatisticsService, getDashboardStatsService, getNotificationsService, getProposalDefensesService, getAllSupervisorsService, } from './api.js';
 
 // Common options for most queries
 function getDefaultQueryOptions() {
@@ -219,5 +219,27 @@ export const useGetNotifications = () => {
     staleTime: 300000, // 5 minutes
     refetchInterval: false,
     retry: 1,
+  });
+};
+
+/* ********** PROPOSAL DEFENSE MANAGEMENT ********** */
+
+export const useGetProposalDefenses = () => {
+  return useQuery({
+    queryKey: ['proposalDefenses'],
+    queryFn: getProposalDefensesService,
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+  });
+};
+/* ********** END OF PROPOSAL DEFENSE MANAGEMENT ********** */
+
+/* ********** SUPERVISOR ********** */
+export const useGetAllSupervisors = () => {
+  return useQuery({
+    queryKey: ['supervisors'],
+    queryFn: getAllSupervisorsService,
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
   });
 };

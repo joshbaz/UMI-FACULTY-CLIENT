@@ -120,7 +120,7 @@ const GradeBook = () => {
       </div>
 
       {/* Book Details */}
-      <div className="grid grid-cols-4 px-6">
+      <div className="grid grid-cols-3 px-6">
         <div>
           <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
             Book ID
