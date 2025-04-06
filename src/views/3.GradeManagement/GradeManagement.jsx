@@ -69,6 +69,38 @@ const GradeManagement = () => {
     setCurrentPage(1);
   }, [activeTab]);
 
+  // Calculate stats from actual data based on active tab
+  const totalProposals = proposalsData?.proposals?.length || 0;
+  const totalBooks = booksData?.books?.length || 0;
+
+  const passedProposals = useMemo(() => {
+    return (proposalsData?.proposals || []).filter(proposal => {
+      return proposal.statuses?.some(status => 
+        status.definition?.name?.includes("passed-proposal graded")
+      );
+    }).length;
+  }, [proposalsData?.proposals]);
+  
+  const failedProposals = useMemo(() => {
+    return (proposalsData?.proposals || []).filter(proposal => {
+      return proposal.statuses?.some(status => 
+        status.definition?.name?.includes("failed-proposal graded")
+      );
+    }).length;
+  }, [proposalsData?.proposals]);
+
+  const passedBooks = useMemo(() => {
+    return (booksData?.books || []).filter(book => {
+      return book.averageExamMark >= 60;
+    }).length;
+  }, [booksData?.books]);
+
+  const failedBooks = useMemo(() => {
+    return (booksData?.books || []).filter(book => {
+      return book.averageExamMark < 60;
+    }).length;
+  }, [booksData?.books]);
+
   if (isLoading || isLoadingBooks) {
     return (
       <div className="flex items-center justify-center h-screen gap-2">
@@ -92,22 +124,10 @@ const GradeManagement = () => {
 
   return (
     <div className="space-y-6">
-      {/* Top Search Bar */}
+      {/* Top Bar */}
       <div className="flex px-6 justify-between items-center border-b border-gray-300 h-[89px]">
-        {/* Search Bar */}
-        <div className="relative w-1/2">
-          <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-semantic-text-secondary"
-            size={18}
-          />
-          <input
-            type="text"
-            placeholder={activeTab === "Proposal Grading" ? "Search by Student Name" : "Search by Book Title"}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-semantic-surface text-sm font-[Inter-Regular] border border-semantic-bg-border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-200"
-          />
-        </div>
+        <p className="text-sm font-[Inter-SemiBold]  text-gray-900">Faculty Portal</p>
+        <p className="text-sm font-[Inter-Medium]  text-gray-600">Digital Research Information Management System</p>
       </div>
 
       {/* Header */}
@@ -122,9 +142,7 @@ const GradeManagement = () => {
       <div className="grid grid-cols-3 gap-4 px-6">
         <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
           <p className="text-3xl font-[Inter-Medium]">
-            {activeTab === "Proposal Grading" 
-              ? proposalsData?.proposals?.length || 0
-              : booksData?.books?.length || 0}
+          {activeTab === "Proposal Grading" ? totalProposals : totalBooks}
           </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             {activeTab === "Proposal Grading" ? "Proposals Submitted" : "Books Submitted"}
@@ -133,9 +151,7 @@ const GradeManagement = () => {
 
         <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
           <p className="text-3xl font-[Inter-Medium]">
-            {activeTab === "Proposal Grading"
-              ? proposalsData?.proposals?.filter(proposal => proposal.status === "passed-proposal graded")?.length || 0
-              : booksData?.books?.filter(book => book.status === "passed")?.length || 0}
+          {activeTab === "Proposal Grading" ? passedProposals : passedBooks}
           </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             <div className="flex items-center gap-1">
@@ -156,9 +172,7 @@ const GradeManagement = () => {
 
         <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
           <p className="text-3xl font-[Inter-Medium]">
-            {activeTab === "Proposal Grading"
-              ? proposalsData?.proposals?.filter(proposal => proposal.status === "Failed")?.length || 0
-              : booksData?.books?.filter(book => book.status === "failed")?.length || 0}
+          {activeTab === "Proposal Grading" ? failedProposals : failedBooks}
           </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             <div className="flex items-center gap-1">

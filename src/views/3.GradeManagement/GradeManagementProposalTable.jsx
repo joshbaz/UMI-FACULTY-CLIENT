@@ -42,7 +42,6 @@ const GradeManagementProposalTable = ({
   const columnHelper = createColumnHelper();
   const [globalFilter, setGlobalFilter] = useState("");
 
-  console.log(data);
 
   const columns = useMemo(
     () => [
@@ -89,10 +88,7 @@ const GradeManagementProposalTable = ({
           );
         },
       }),
-      columnHelper.accessor("averageDefenseMark", {
-        header: "Mark Range",
-        cell: (info) => info.getValue() ? `${info.getValue()}%` : "-",
-      }),
+     
       columnHelper.accessor("defenseGrade", {
         header: "Category",
         cell: (info) => {

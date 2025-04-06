@@ -81,21 +81,21 @@ const GradeManagementBookTable = ({
               borderRadius: '0.375rem',
               display: 'inline-block'
             }}
-            className="capitalize text-xs font-[Inter-Regular]"
+            className="capitalize text-xs whitespace-normal font-[Inter-Regular]"
           >
             {currentStatus?.definition?.name?.toLowerCase() || 'Unknown'}
           </span>
           );
         },
       }),
-      columnHelper.accessor("averageBookMark", {
+      columnHelper.accessor("averageExamMark", {
         header: "Mark Range",
         cell: (info) => info.getValue() ? `${info.getValue()}%` : "-",
       }),
       columnHelper.accessor("bookGrade", {
         header: "Category",
         cell: (info) => {
-          const averageMark = info.row.original.averageBookMark;
+          const averageMark = info.row.original.averageExamMark;
           let status = 'NOT GRADED';
           
           if (averageMark !== null && averageMark !== undefined) {
@@ -191,7 +191,7 @@ const GradeManagementBookTable = ({
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="px-4 py-3 text-left text-sm font-[Inter-Medium] text-gray-500 capitalize tracking-wider"
+                  className="px-3 py-3 text-left text-sm font-[Inter-Medium] text-gray-500 capitalize tracking-wider"
                 >
                   {header.isPlaceholder
                     ? null
@@ -210,7 +210,7 @@ const GradeManagementBookTable = ({
               {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}
-                  className="px-4 py-4 whitespace-nowrap text-sm font-[Inter-Regular] text-gray-900"
+                  className="px-3 py-4 whitespace-nowrap text-sm font-[Inter-Regular] text-gray-900"
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
