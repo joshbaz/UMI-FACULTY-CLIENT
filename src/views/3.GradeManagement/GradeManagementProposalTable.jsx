@@ -45,11 +45,11 @@ const GradeManagementProposalTable = ({
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor("id", {
+      columnHelper.accessor("proposalCode", {
         header: "Proposal ID",
         cell: (info) => (
           <div className="text-xs text-primary-500 uppercase font-[Inter-Medium]">
-            {/* {info.getValue().toString().padStart(4, '0')} */} PR-2025-001
+            {info.getValue()}
           </div>
         ),
       }),
