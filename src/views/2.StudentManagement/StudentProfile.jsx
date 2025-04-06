@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetStudent } from "../../store/tanstackStore/services/queries";
@@ -13,7 +13,14 @@ const StudentProfile = () => {
   const { id } = useParams();
   const containerRef = useRef(null);
 
+
   const { data: studentData, isLoading, error } = useGetStudent(id);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollIntoView({ behavior: "instant" });
+    }
+  }, [id, activeTab]);
 
   if (error) {
     return (
@@ -66,11 +73,12 @@ const StudentProfile = () => {
     <div ref={containerRef} className="min-h-full bg-gray-50">
        {/* Top Search Bar */}
       <div className="flex px-6 justify-between items-center border-b border-gray-300 h-[89px]">
-        
+        <p className="text-sm font-[Inter-SemiBold]  text-gray-900">Faculty Portal</p>
+        <p className="text-sm font-[Inter-Medium]  text-gray-600">Digital Research Information Management System</p>
       </div>
 
       {/* Header */}
-      <div className="flex justify-between items-center px-6 py-4">
+      <div className="flex justify-between items-center px-6 py-6">
         <h1 className="text-2xl font-[Inter-Medium]">
           Student Profile
         </h1>

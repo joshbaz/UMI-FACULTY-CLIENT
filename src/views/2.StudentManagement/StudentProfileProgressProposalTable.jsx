@@ -16,6 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Icon } from "@iconify-icon/react";
+import { format } from "date-fns";
 // import { useGetStudentProposals } from "../../store/tanstackStore/services/queries";
 
 const getCategoryStyle = (status) => {
@@ -113,12 +114,12 @@ const StudentProfileProgressProposalTable = ({
     columnHelper.accessor("submissionDate", {
       header: "Submitted",
       cell: (info) =>
-        info.getValue() ? new Date(info.getValue()).toLocaleDateString() : "-",
+        info.getValue() ? format(new Date(info.getValue()), 'PP') : "-",
     }),
     columnHelper.accessor("defenseDate", {
       header: "Defense",
       cell: (info) =>
-        info.getValue() ? new Date(info.getValue()).toLocaleDateString() : "-",
+        info.getValue() ? format(new Date(info.getValue()), 'PP') : "-",
     }),
     columnHelper.accessor("gradedAt", {
       header: "Graded",

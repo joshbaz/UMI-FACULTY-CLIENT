@@ -16,14 +16,29 @@ import StudentProfileProgressProposalTable from "./StudentProfileProgressProposa
 import StudentProfileProgressStatusDrawer from "./StudentProfileProgressStatusDrawer.jsx";
 import StudentProfileProgressProposalDrawer from "./StudentProfileProgressProposalDrawer.jsx";
 import { useParams } from "react-router-dom";
+import { useGetStudentBooks } from "../../store/tanstackStore/services/queries.js";
+import StudentProfileProgressBookTable from "./StudentProfileProgressBookTable.jsx";
+import StudentProfileProgressBookDrawer from "./StudentProfileProgressBookDrawer.jsx";
 
 const StudentProfileProgressPage = ({ studentData }) => {
   const [activeView, setActiveView] = useState("tracker");
   const [isStatusDrawerOpen, setIsStatusDrawerOpen] = useState(false);
   const [isProposalDrawerOpen, setIsProposalDrawerOpen] = useState(false);
+  const [isBookDrawerOpen, setIsBookDrawerOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [selectedProposal, setSelectedProposal] = useState(null);
+  const [selectedBook, setSelectedBook] = useState(null);
   const { id } = useParams();
+
+  const [resultsApprovedDate, setResultsApprovedDate] = useState(
+    studentData?.student?.resultsApprovedDate || ""
+  );
+  const [resultsSentDate, setResultsSentDate] = useState(
+    studentData?.student?.resultsSentDate || ""
+  );
+  const [senateApprovalDate, setSenateApprovalDate] = useState(
+    studentData?.student?.senateApprovalDate || ""
+  );
 
   const {
     data: studentStatuses,
@@ -31,6 +46,8 @@ const StudentProfileProgressPage = ({ studentData }) => {
   } = useGetStudentStatuses(id);
 
   const { data: proposals, isLoading: isLoadingProposals } = useGetStudentProposals(id);
+
+  const { data: books, isLoading: isLoadingBooks } = useGetStudentBooks(id);
 
   const currentStatus = useMemo(
     () => studentData?.student?.statuses?.find((s) => s.isCurrent),
@@ -65,6 +82,15 @@ const StudentProfileProgressPage = ({ studentData }) => {
   const handleViewChange = useCallback((view) => {
     setActiveView(view);
   }, []);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "Not set";
+    try {
+      return new Date(dateString).toLocaleDateString('en-UG', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (error) {
+      return "Invalid date";
+    }
+  };
 
   const renderTimelineBar = useCallback(
     (status, index) => {
@@ -141,7 +167,7 @@ const StudentProfileProgressPage = ({ studentData }) => {
       return (
         <div key={status.id} className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-md shadow-sm">
           <div
-            className="w-3 h-3 rounded-sm flex-shrink-0"
+            className="w-3 h-3 rounded-[4px] flex-shrink-0"
             style={{
               backgroundColor: status.definition?.color || "#313132",
             }}
@@ -166,7 +192,8 @@ const StudentProfileProgressPage = ({ studentData }) => {
   return (
     <div className="space-y-6 ">
       {/* Section 1: Student Information Details */}
-      <div className="grid grid-cols-3 gap-x-16">
+      <div className="grid grid-cols-3 gap-x-16 gap-y-4">
+        {/** supervisor */}
         <div>
           <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
             Supervisor
@@ -188,7 +215,7 @@ const StudentProfileProgressPage = ({ studentData }) => {
             </button>
           </div>
         </div>
-
+        {/** status */}
         <div>
           <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
             Current Status
@@ -207,7 +234,7 @@ const StudentProfileProgressPage = ({ studentData }) => {
             {currentStatus?.definition?.name || "Unknown"}
           </span>
         </div>
-
+        {/** time */}
         <div>
           <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
             Total Time
@@ -215,6 +242,41 @@ const StudentProfileProgressPage = ({ studentData }) => {
           <span className="text-sm font-[Inter-Regular] text-gray-900">
             {totalDays} {expectedDays && `of ${expectedDays} days`}
           </span>
+        </div>
+        {/** results approved */}
+        <div>
+          <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
+            Results Approved
+          </h3>
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-[Inter-Regular] text-gray-900">
+              {formatDate(resultsApprovedDate)}
+            </span>
+          </div>
+        </div>
+
+        {/** results sent to schools */}
+        <div>
+          <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
+            Results Sent to School
+          </h3>
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-[Inter-Regular] text-gray-900">
+              {formatDate(resultsSentDate)}
+            </span>
+          </div>
+        </div>
+
+        {/** senate approval */}
+        <div>
+          <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
+            Senate Approval
+          </h3>
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-[Inter-Regular] text-gray-900">
+              {formatDate(senateApprovalDate)}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -228,10 +290,10 @@ const StudentProfileProgressPage = ({ studentData }) => {
           {/* Expected Completion Date Indicator */}
           {studentData?.student?.expectedCompletionDate && (
             <div className="relative h-6 mb-1">
-              <div 
+              <div
                 className="absolute h-6 border-l-2 border-red-500 border-dashed"
                 style={{
-                  left: '100%',
+                  left: "100%",
                 }}
               >
                 <TooltipProvider>
@@ -241,7 +303,10 @@ const StudentProfileProgressPage = ({ studentData }) => {
                     </TooltipTrigger>
                     <TooltipContent>
                       <div className="text-sm">
-                        Expected Completion Date: {new Date(studentData.student.expectedCompletionDate).toLocaleDateString()}
+                        Expected Completion Date:{" "}
+                        {new Date(
+                          studentData.student.expectedCompletionDate
+                        ).toLocaleDateString()}
                       </div>
                     </TooltipContent>
                   </Tooltip>
@@ -249,7 +314,7 @@ const StudentProfileProgressPage = ({ studentData }) => {
               </div>
             </div>
           )}
-          
+
           {/* Timeline Progress Bar */}
           <div className="space-y-2">
             <div className="relative h-8 bg-white shadow-md flex gap-1">
@@ -326,6 +391,17 @@ const StudentProfileProgressPage = ({ studentData }) => {
             isLoadingProposals={isLoadingProposals}
           />
         )}
+
+          {/* Grading Progress Table */}
+          {activeView === "book" && (
+          <StudentProfileProgressBookTable
+            setIsStatusDrawerOpen={setIsBookDrawerOpen}
+            setSelectedStatus={setSelectedBook}
+            studentId={studentData?.student?.id}
+            books={books?.books || []}  
+            isLoadingBooks={isLoadingBooks}
+          />
+        )}
       </div>
 
       {isStatusDrawerOpen && (
@@ -343,7 +419,15 @@ const StudentProfileProgressPage = ({ studentData }) => {
           isOpen={isProposalDrawerOpen}
           onClose={() => setIsProposalDrawerOpen(false)}
           proposalData={selectedProposal}
-         
+        />
+      )}
+
+{isBookDrawerOpen && (
+        <StudentProfileProgressBookDrawer
+          isOpen={isBookDrawerOpen}
+          onClose={() => setIsBookDrawerOpen(false)}
+          bookData={selectedBook}
+          studentData={studentData?.student}
         />
       )}
     </div>

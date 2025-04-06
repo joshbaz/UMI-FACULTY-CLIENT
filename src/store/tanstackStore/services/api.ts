@@ -356,7 +356,7 @@ export const getBookService = async (bookId: string) => {
 
 export const getStudentBooksService = async (studentId: string) => {
   try {
-    const response = await apiRequest.get(`/faculty/students/${studentId}/books`);
+    const response = await apiRequest.get(`/faculty/student-books/${studentId}`);
     return response.data;
   } catch (error) {
     errorHandling(error);
@@ -368,4 +368,52 @@ export const getStudentBooksService = async (studentId: string) => {
 
 
 /* ********** END OF BOOK MANAGEMENT ********** */
+
+/* ********** DASHBOARD MANAGEMENT ********** */
+
+export const getDashboardStatsService = async () => {
+    try {
+        const response = await apiRequest.get('/faculty/dashboard/stats');
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+export const getStatusStatisticsService = async (category?: string) => {
+    try {
+        console.log("category", category);
+        const url = category 
+            ? `/faculty/dashboard/status-statistics?category=${category}` 
+            : '/faculty/dashboard/status-statistics';
+        const response = await apiRequest.get(url);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+        throw error;
+    }
+}
+
+export const getProgressTrendsService = async (timeRange: string) => {
+    try {
+        const response = await apiRequest.get(`/faculty/dashboard/progress-trends?timeRange=${timeRange}`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+
+/* ********** END OF DASHBOARD MANAGEMENT ********** */
+
+/* ********** NOTIFICATION MANAGEMENT ********** */
+
+export const getNotificationsService = async () => {
+    try {
+        const response = await apiRequest.get('/faculty/notifications');
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
 

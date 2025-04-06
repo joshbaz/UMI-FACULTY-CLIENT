@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals, getAllExaminersService, getExaminerService, getBookService, getStudentBooksService, getAllBooksService, } from './api.js';
+import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals, getAllExaminersService, getExaminerService, getBookService, getStudentBooksService, getAllBooksService, getProgressTrendsService, getStatusStatisticsService, getDashboardStatsService, getNotificationsService, } from './api.js';
 
 // Common options for most queries
 function getDefaultQueryOptions() {
@@ -177,3 +177,47 @@ export function useGetStudentBooks(studentId: string) {
     enabled: !!studentId,
   });
 }
+
+/* ********** DASHBOARD MANAGEMENT ********** */
+
+export const useGetDashboardStats = () => {
+  return useQuery({
+    queryKey: ['dashboardStats'],
+    queryFn: getDashboardStatsService,
+    staleTime: 300000, // 5 minutes
+    refetchInterval: false,
+    retry: 1,
+  });
+};
+
+export const useGetStatusStatistics = (category?: string) => {
+  return useQuery({
+    queryKey: ['statusStatistics', category],
+    queryFn: () => getStatusStatisticsService(category),
+    staleTime: 300000, // 5 minutes
+    refetchInterval: false,
+    retry: 1,
+  });
+};
+
+export const useGetProgressTrends = (timeRange: string) => {
+  return useQuery({
+    queryKey: ['progressTrends', timeRange],
+    queryFn: () => getProgressTrendsService(timeRange),
+    staleTime: 300000, // 5 minutes
+    refetchInterval: false,
+    retry: 1,
+  });
+};
+/* ********** END OF DASHBOARD MANAGEMENT ********** */
+/* ********** NOTIFICATION MANAGEMENT ********** */
+
+export const useGetNotifications = () => {
+  return useQuery({
+    queryKey: ['notifications'],
+    queryFn: getNotificationsService,
+    staleTime: 300000, // 5 minutes
+    refetchInterval: false,
+    retry: 1,
+  });
+};

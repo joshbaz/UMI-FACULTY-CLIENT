@@ -2,6 +2,39 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+
+/* Remove default margin and ensure full height */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  /* Reduce outline/focus/ring to 1px */
+  *:focus,
+  *:focus-visible,
+  *:focus-within,
+  *.ring,
+  *[class*="ring"] {
+    outline-width: 0px !important;
+    box-shadow: 0 0 0 0px var(--ring, currentColor) !important;
+  }
+  
+  /* Ensure input elements also have 1px outline/ring */
+  input:focus,
+  textarea:focus,
+  select:focus,
+  button:focus {
+    outline-width: 1px !important;
+    box-shadow: 0 0 0 0px var(--ring, currentColor) !important;
+  }
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: 4px;  /* Firefox */
+}
+
 .docx-preview {
   background-color: white;
   padding: 1rem;
@@ -65,6 +98,7 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }
+
 
 /* a {
   font-weight: 500;
@@ -465,9 +499,10 @@ button:focus-visible {
 
 @layer base {
   * {
-    @apply border-border;
-    }
+    @apply border-border outline-ring/50;
+  }
   body {
     @apply bg-background text-foreground;
-    }
+  }
 }
+

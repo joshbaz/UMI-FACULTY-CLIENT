@@ -1,72 +1,233 @@
-import { useState } from 'react';
-import { ChevronDown, CheckCircle } from 'lucide-react';
-
-const notifications = [
-  {
-    id: 1,
-    title: 'Report overdue by {{ 0 days }}.',
-    message: 'Reminder sent to student.',
-    time: '2h',
-    status: 'dot'
-  },
-  {
-    id: 2,
-    title: 'Supervisor Not Assigned',
-    message: 'Student {{ Fullname }}. {{ Passed/Failed }} Viva defense. Status updated.',
-    time: 'open',
-    status: 'checked'
-  },
-  {
-    id: 3,
-    title: 'Proposal review not started {{ 0 days }} after submission. Follow-up needed.',
-    time: '14 Feb',
-    status: 'dot'
-  }
-];
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ChevronsUpDown } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useGetNotifications } from "@/store/tanstackStore/services/queries";
+import NotificationDrawer from "../4.Notifications/NotificationsDrawer";
+import { useNavigate } from "react-router-dom";
 
 const DNotificationLog = () => {
-  const [activeTab, setActiveTab] = useState('feed');
+  const [selectedNotification, setSelectedNotification] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const navigate = useNavigate();
 
-  return (
-    <div className="bg-white p-4 rounded-lg shadow-md min-w-80">
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="text-lg font-semibold">Notification Log</h2>
-        <button className="bg-[#23388F] text-white px-3 py-1 rounded-md text-sm flex items-center">
-          View More <ChevronDown size={14} className="ml-1" />
-        </button>
-      </div>
+  // Fetch notifications data from API
+  const { data: notificationsData, isLoading } = useGetNotifications();
+  const notifications = notificationsData?.notifications || [];
+  
+  // Filter notifications by status
+  const upcomingNotifications = notifications.filter(n => n.statusType === 'PENDING' || n.statusType === 'NEW').slice(0, 3);
+  const sentNotifications = notifications.filter(n => n.statusType === 'SENT' || n.statusType === 'READ').slice(0, 3);
 
-      <div className="flex items-center border-b pb-2">
-        <button
-          className={`relative text-sm font-medium mr-4 ${activeTab === 'feed' ? 'text-black' : 'text-gray-500'}`}
-          onClick={() => setActiveTab('feed')}
-        >
-          Feed
-          <span className="ml-1 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">5</span>
-        </button>
-      </div>
+  const handleNotificationClick = (notification) => {
+    setSelectedNotification(notification);
+  };
 
-      <div className="mt-3 space-y-3">
-        {notifications.map((notif) => (
-          <div key={notif.id} className="flex items-start space-x-2">
-            {notif.status === 'dot' && <span className="h-2 w-2 bg-blue-500 rounded-full mt-1"></span>}
-            {notif.status === 'checked' && <CheckCircle size={16} className="text-gray-400 mt-1" />}
+  const handleOpenDrawer = (notificationId) => {
+    setIsDrawerOpen(true);
+  };
 
-            <div className="flex-1">
-              <p className="text-sm font-semibold">{notif.title}</p>
-              <p className="text-xs text-gray-500">{notif.message}</p>
-              {notif.time === 'open' ? (
-                <span className="bg-[#23388F] text-white px-2 py-0.5 text-xs font-semibold rounded-md mt-1 inline-block">
-                  Open
-                </span>
-              ) : (
-                <p className="text-xs text-gray-400 mt-1">{notif.time}</p>
-              )}
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+  };
+
+  // Get priority color
+  const getPriorityColor = (priority) => {
+    switch(priority?.toLowerCase()) {
+      case 'urgent': return 'bg-red-500';
+      case 'important': return 'bg-orange-500';
+      case 'anytime': return 'bg-green-500';
+      default: return 'bg-sky-500';
+    }
+  };
+
+  // Format notification message
+  const formatMessage = (notification) => {
+    const studentName = notification?.studentStatus?.student 
+      ? `${notification.studentStatus.student.firstName} ${notification.studentStatus.student.lastName}`
+      : 'A student';
+    
+    switch(notification.type) {
+      case 'STUDENT_ADDED':
+        return `${studentName} has been added to the database`;
+      case 'STATUS_CHANGE':
+        return `${studentName}'s status has been updated`;
+      case 'DOCUMENT_UPLOADED':
+        return `${studentName} has uploaded a new document`;
+      default:
+        return notification?.message || 'New notification received';
+    }
+  };
+
+  // Get notification title
+  const getNotificationTitle = (notification) => {
+    switch(notification.type) {
+      case 'STUDENT_ADDED':
+        return 'New Student Added';
+      case 'STATUS_CHANGE':
+        return 'Status Update';
+      case 'DOCUMENT_UPLOADED':
+        return 'Document Upload';
+      default:
+        return notification.type || 'Notification';
+    }
+  };
+
+  // Get time ago
+  const getTimeAgo = (dateString) => {
+    if (!dateString) return 'N/A';
+    
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+      
+      if (diffMins < 60) return `${diffMins}m`;
+      if (diffHours < 24) return `${diffHours}h`;
+      if (diffDays < 30) return `${diffDays}d`;
+      
+      return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}`;
+    } catch (e) {
+      return 'N/A';
+    }
+  };
+
+  // Render notification list
+  const renderNotificationList = (notificationList) => {
+    if (notificationList.length === 0) {
+      return <div className="text-center  py-6 text-gray-500">No notifications available</div>;
+    }
+
+    return notificationList.map((notification) => (
+      <div
+        key={notification.id}
+        onClick={() => handleNotificationClick(notification)}
+        className={`flex cursor-pointer select-none items-start justify-between px-2 gap-1 py-4 ${
+          selectedNotification?.id === notification.id
+            ? "bg-[#E5E7EB]/40"
+            : "bg-white"
+        }`}
+      >
+        <div className="flex flex-row items-baseline gap-2">
+          <div className={`flex h-2 w-2 rounded-full ${getPriorityColor(notification.priority)}`} />
+
+          <div className="flex flex-col justify-start m-0 start-0 ">
+            <div className="text-sm font-medium text-gray-500 align-text-top">
+              {notification?.title || "Notification"}
+            </div>
+            <div className="text-sm text-gray-500">
+              {formatMessage(notification)}
+            </div>
+
+            <div className="mt-2 min-h-4">
+              <Button
+                onClick={() => handleOpenDrawer(notification.id)}
+                className={`${
+                  selectedNotification?.id === notification.id
+                    ? "flex"
+                    : "hidden"
+                } text-sm text-white bg-primary-500 hover:bg-primary-500 hover:bg-opacity-70`}
+              >
+                open
+              </Button>
             </div>
           </div>
-        ))}
+        </div>
+
+        <div className="text-sm text-gray-500">{getTimeAgo(notification.createdAt)}</div>
       </div>
-    </div>
+    ));
+  };
+
+  return (
+    <Tabs defaultValue="upcoming">
+      <Card className="flex flex-col h-full">
+        <CardHeader className="flex items-start gap-2 space-y-0 py-2 sm:flex-col">
+          <div className="flex flex-row w-full justify-between items-start gap-6 space-y-0">
+            <CardTitle className="text-lg font-medium text-gray-900">
+              Notification Log
+            </CardTitle>
+            <Button
+              onClick={() => navigate('/notifications')}
+              variant=""
+              className="text-sm text-white bg-primary-500 hover:bg-primary-500 hover:bg-opacity-70"
+            >
+              <span>View More</span>{" "}
+              <ChevronsUpDown className="text-white w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-4 border-b border-gray-200 w-full">
+            <TabsList className="flex justify-start  px-0 py-0 h-max rounded-none !bg-transparent ">
+              <TabsTrigger value="upcoming" className="flex !w-max  rounded-none !bg-transparent outline-none !shadow-none border-0 data-[state=active]:border-b-2 data-[state=active]:border-primary-500 data-[state=active]:text-primary-500 ">
+                <div className="flex items-center   gap-2 bg-transparent py-2 ">
+                  <span className="text-sm text-primary-500">Upcoming</span>
+                  <div className="rounded-lg bg-[#FEF2F2] text-red-900 px-2 text-sm ">
+                    {upcomingNotifications.length}
+                  </div>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="sent" className="flex rounded-none !bg-transparent outline-none !shadow-none border-0 data-[state=active]:border-b-2 data-[state=active]:border-primary-500 data-[state=active]:text-primary-500 ">
+                <div className="flex items-center w-max gap-2 bg-transparent py-2 ">
+                  <span className="text-sm text-primary-500">Sent</span>
+                  <div className="rounded-lg bg-[#F0F9FF] text-blue-900 px-2 text-sm ">
+                    {sentNotifications.length}
+                  </div>
+                </div>
+              </TabsTrigger>
+            </TabsList>
+          </div>
+        </CardHeader>
+
+        <CardContent className="px-2 pt-2  sm:px-6 sm:pt-0">
+          <TabsContent value="upcoming" >
+            {isLoading ? (
+              <div className="animate-pulse space-y-3">
+                <div className="h-16 bg-gray-200 rounded w-full"></div>
+                <div className="h-16 bg-gray-200 rounded w-full"></div>
+                <div className="h-16 bg-gray-200 rounded w-full"></div>
+              </div>
+            ) : (
+              <div>
+                {renderNotificationList(upcomingNotifications)}
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="sent">
+            {isLoading ? (
+              <div className="animate-pulse space-y-3">
+                <div className="h-16 bg-gray-200 rounded w-full"></div>
+                <div className="h-16 bg-gray-200 rounded w-full"></div>
+                <div className="h-16 bg-gray-200 rounded w-full"></div>
+              </div>
+            ) : (
+              <div>
+                {renderNotificationList(sentNotifications)}
+              </div>
+            )}
+          </TabsContent>
+        </CardContent>
+      </Card>
+      
+      {/* Notification Drawer */}
+      {selectedNotification && (
+        <NotificationDrawer 
+          isOpen={isDrawerOpen} 
+          onClose={handleCloseDrawer} 
+          notificationId={selectedNotification.id} 
+        />
+      )}
+    </Tabs>
   );
 };
 

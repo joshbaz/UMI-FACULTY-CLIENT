@@ -1,3 +1,13 @@
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { CirclePlus, ChevronsUpDown, Loader2 } from "lucide-react";
 import {
     useReactTable,
     getCoreRowModel,
@@ -5,110 +15,194 @@ import {
     getPaginationRowModel,
     flexRender,
   } from "@tanstack/react-table";
-  import { useState } from "react";
-  import { ChevronDown, Plus } from "lucide-react";
+import { useGetAllStudents } from "@/store/tanstackStore/services/queries";
+import { useNavigate } from "react-router-dom";
+// Sample student data for fallback
+export const DUMMY_DATA = [
+  {
+    id: 1,
+    fullname: "Jenny Wilson",
+    email: "jenny.wilson@example.com",
+    phone: "+254 712 345 678",
+    schoolCode: "SBM",
+    userAccess: "Student",
+    campus: "Main Campus",
+    category: "Masters",
+    status: "Workshop",
+    supervisor: "Prof. Benjamin Russel",
+    dateOfAdmission: "29/01/2025",
+    currentStatus: "Under Examination",
+    totalTime: "120 days",
+    createdAt: "2024-01-15",
+  },
+
   
-  const dataTable = [
-    { id: 1, fullname: "Joshua Kimbareeba", campus: "Kampala", category: "Masters", status: "Under Examination" },
- 
-  ];
+];
+
+// Table column definitions
+
+
+const DTable = () => {
+  const navigate = useNavigate();
+  const [columnVisibility, setColumnVisibility] = useState({
+    fullname: true,
+    email: true,
+    category: true,
+    campus: true,
+    status: true,
+  });
+
+  // Fetch students data using the query hook
+  const { data: studentsData, isLoading, isError } = useGetAllStudents();
   
+  // Use the fetched data or fallback to dummy data if not available
+  const tableData = (studentsData?.students || []).slice(0, 8);
+
+
   const columns = [
-    { accessorKey: "fullname", header: "Fullname" },
-    { accessorKey: "campus", header: "Campus" },
+    {
+      accessorKey: "fullname",
+      header: () => <span className="text-sm">Fullname</span>,
+      cell: (info) => {
+        return <div className="text-sm capitalize">{`${info?.row?.original?.firstName} ${info?.row?.original?.lastName}` }</div>;
+      },
+    },
+    
+    {
+      accessorKey: "campus",
+      header: () => <span className="text-sm">Campus</span>,
+      cell: (info) => <div className="text-sm">{info?.row?.original?.campus?.name}</div>,
+    },
+    
     {
       accessorKey: "category",
-      header: "Category",
-      cell: ({ row }) => (
-        <span
-          className={`px-2 py-1 text-xs font-semibold rounded-md ${
-            row.original.category === "PhD"
-              ? "bg-yellow-200 text-yellow-800"
-              : "bg-orange-200 text-orange-800"
-          }`}
-        >
-          {row.original.category}
-        </span>
+      header: () => <span className="text-sm">Category</span>,
+      cell: (info) => (
+        <div className="inline-flex h-[28px] capitalize rounded-[6px] border py-[4px] px-[9px] bg-accent2-300 items-center justify-center whitespace-nowrap text-sm">
+          {info?.row?.original?.programLevel}
+        </div>
       ),
     },
     {
       accessorKey: "status",
-      header: "Status",
-      cell: () => (
-        <span className="px-2 py-1 text-xs font-semibold rounded-md border border-gray-400 text-gray-700">
-          Under Examination
-        </span>
-      ),
-    },
-  ];
-  
-  const DTable = () => {
-    const [data] = useState(dataTable);
-  
-    const table = useReactTable({
-      data,
-      columns,
-      getCoreRowModel: getCoreRowModel(),
-      getFilteredRowModel: getFilteredRowModel(),
-      getPaginationRowModel: getPaginationRowModel(),
-    });
-  
-    return (
-      <div className="bg-white w-full p-4 rounded-lg shadow-md">
-        {/* Header */}
-        <div className="flex flex-col space-y-2 mb-2">
-          <h2 className="text-lg font-semibold">Recently Added</h2>
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex gap-2">
-              <button className="bg-[#23388F] text-white px-3 py-1 rounded-md text-sm flex items-center">
-                View More <ChevronDown size={14} className="ml-1" />
-              </button>
-              <button className="bg-gray-200 px-3 py-1 rounded-md text-sm flex items-center">
-                Add Student <Plus size={14} className="ml-1" />
-              </button>
-            </div>
+      header: () => <span className="text-sm">Status</span>,
+      cell: (info) => {
+        // Find the current status from the student's statuses array
+        const currentStatus = info.row.original.statuses?.find(status => status.isCurrent)?.definition?.name || "Unknown";
+        
+        return (
+          <div
+            className={`h-[28px] rounded-[6px] border py-[4px] w-max px-[9px] flex items-center justify-center whitespace-nowrap text-sm`}
+            style={{
+              backgroundColor: `${info.row.original.statuses?.find(status => status.isCurrent)?.definition?.color || '#6B7280'}20`,
+              borderColor: info.row.original.statuses?.find(status => status.isCurrent)?.definition?.color || '#6B7280',
+              
+              
+              color: info.row.original.statuses?.find(status => status.isCurrent)?.definition?.color || '#6B7280',
+            }}
+          >
+            {currentStatus}
           </div>
+        );
+      },
+    },
+    
+  ];
+
+  const table = useReactTable({
+    data: tableData,
+    columns,
+    state: {
+     
+      columnVisibility,
+   
+    },
+    onColumnVisibilityChange: setColumnVisibility,
+   
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: false,
+   
+  });
+  return (
+    <Card className="flex flex-col h-full">
+      <CardHeader className="flex flex-row justify-between items-start  gap-6 space-y-0  py-1 ">
+        <CardTitle className="text-lg font-medium text-gray-900">
+          Recently Added
+        </CardTitle>
+
+        <div className="flex items-center justify-end  gap-4">
+        <Button onClick={() => navigate("/students/add")} variant="outline" className="text-sm border border-primary-500 text-primary-500  flex items-center">
+            <span>Add Student</span>{" "}
+            
+          </Button>
+          <Button
+          onClick={() => navigate("/students")}
+            variant=""
+            className="text-sm text-white bg-primary-500 hover:bg-primary-500 hover:bg-opacity-70"
+          >
+            <span>View More</span>{" "}
+            <ChevronsUpDown className="text-white w-4 h-4" />
+          </Button>
+         
         </div>
-  
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            {/* Header Row */}
-            <thead className="bg-gray-100">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="border-b border-gray-300">
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className="p-3 text-left text-sm font-semibold"
-                    >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-  
-            {/* Table Body */}
-            <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="border-b border-gray-300 hover:bg-gray-50 text-sm">
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="p-2">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-  
-  export default DTable;
-  
+      </CardHeader>
+
+      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-0">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : isError ? (
+          <div className="text-center py-4 text-red-500">
+            Error loading student data. Please try again.
+          </div>
+        ) : (
+          /* Table Structure */
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm divide-y divide-gray-200">
+              {/* Table Header */}
+              <thead className="bg-gray-50">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className="px-3 py-2 text-left text-xs font-medium text-gray-500 capitalize tracking-wider"
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              {/* Table Body */}
+              <tbody className="bg-white divide-y divide-gray-200">
+                {table.getRowModel().rows.map((row) => (
+                  <tr key={row.id} className="hover:bg-gray-50">
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-3 py-1 whitespace-nowrap text-xs text-gray-900">
+                        {cell.column.columnDef.cell
+                          ? flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )
+                          : cell.renderCell()}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default DTable;

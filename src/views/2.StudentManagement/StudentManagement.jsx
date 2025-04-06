@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useGetAllStudents } from "../../store/tanstackStore/services/queries";
+import { useGetAllStudents, useGetDashboardStats } from "../../store/tanstackStore/services/queries";
 import { Loader2, Search } from "lucide-react";
 import { format } from "date-fns";
+import { Icon } from "@iconify-icon/react";
 import {
   Tooltip,
   TooltipContent,
@@ -25,6 +26,9 @@ const StudentManagement = () => {
   );
 
   const { data: studentsData, isLoading, error } = useGetAllStudents();
+
+  // Query to fetch dashboard stats
+  const { data: statsData, isLoading: statsLoading } = useGetDashboardStats();
 
   // Save pagination state to localStorage
   useEffect(() => {
@@ -76,22 +80,12 @@ const StudentManagement = () => {
   return (
     <div className="space-y-6 ">
       {/* Top Search Bar */}
-      <div className="flex px-6 justify-between items-center border-b border-gray-300 h-[89px]">
-        {/* Search Bar */}
-        <div className="relative w-1/2">
-          <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-semantic-text-secondary"
-            size={18}
-          />
-          <input
-            type="text"
-            placeholder="Search by Name"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-semantic-surface text-sm font-[Inter-Regular]  border border-semantic-bg-border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-200"
-          />
-        </div>
+      <div className="flex items-center justify-between  px-6 pb-0 w-full h-[88px] border-b border-gray-200">
+        {/* <h2 className="text-lg font-[Inter-SemiBold] text-gray-800">DRIMS</h2> */}
+        <p className="text-sm font-[Inter-SemiBold]  text-gray-900">Faculty Portal</p>
+        <p className="text-sm font-[Inter-Medium]  text-gray-600">Digital Research Information Management System</p>
       </div>
+      
 
       {/* Header */}
       <div className="flex justify-between items-center px-6 py-3">
@@ -105,64 +99,88 @@ const StudentManagement = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 px-6">
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <p className="mt-2 text-3xl font-[Inter-Medium]">{studentsData?.students?.length || 0}</p>
-          <h3 className="text-sm font-[Inter-Medium] text-gray-500">
-            Total Students
-          </h3>
-        </div>
+      <div className="bg-[#FDFDFE] border border-[#E5E7EB] p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        {statsLoading ? (
+          <div className="animate-pulse">
+            <div className="h-6 bg-gray-200 rounded w-20 mx-auto mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-32 mx-auto"></div>
+          </div>
+        ) : (
+          <>
+            <p className="mt-2 text-3xl font-semibold">{statsData?.totalStudents || "0"}</p>
+            <h3 className="text-sm font-medium text-gray-500">Total Students</h3>
+          </>
+        )}
+      </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <p className="mt-2 text-3xl font-[Inter-Medium]">
-            {studentsData?.students?.filter(student => student.isActive)?.length || 0}
-          </p>
-          <h3 className="text-sm font-[Inter-Medium] text-gray-500">
-            Active Students
-          </h3>
-        </div>
+      <div className="bg-[#FDFDFE] border border-[#E5E7EB] p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        {statsLoading ? (
+          <div className="animate-pulse">
+            <div className="h-6 bg-gray-200 rounded w-20 mx-auto mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-32 mx-auto"></div>
+          </div>
+        ) : (
+          <>
+            <p className="mt-2 text-3xl font-semibold">{statsData?.ongoingStudents || "0"}</p>
+            <h3 className="text-sm font-medium text-gray-500">Ongoing Students</h3>
+          </>
+        )}
+      </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <p className="mt-2 text-3xl font-[Inter-Medium]">
-            {studentsData?.students?.filter(student => student.status === "Workshop")?.length || 0}
-          </p>
-          <h3 className="text-sm font-[Inter-Medium] text-gray-500">
-            <div className="flex items-center gap-1">
-              Status: Workshop
+      <div className="bg-[#FDFDFE] border border-[#E5E7EB] p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        {statsLoading ? (
+          <div className="animate-pulse">
+            <div className="h-6 bg-gray-200 rounded w-20 mx-auto mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-32 mx-auto"></div>
+          </div>
+        ) : (
+          <>
+            <p className="mt-2 text-3xl font-semibold">{statsData?.normalProgress || "0"}</p>
+            <h3 className="text-sm font-medium text-gray-500 flex items-center gap-1">
+              Normal Progress
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <InfoIcon className="h-4 w-4" />
+                    <Icon
+                      icon="tdesign:info-circle-filled"
+                      className="w-4 h-4 text-gray-400 pt-1"
+                    />
                   </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Workshop Status</p>
-                  </TooltipContent>
+                  <TooltipContent>Students currently in normal progress</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            </div>
-          </h3>
-        </div>
+            </h3>
+          </>
+        )}
+      </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <p className="mt-2 text-3xl font-[Inter-Medium]">
-            {studentsData?.students?.filter(student => student.status === "Normal Progress")?.length || 0}
-          </p>
-          <h3 className="text-sm font-[Inter-Medium] text-gray-500">
-            <div className="flex items-center gap-1">
-              Status: Normal Progress
-              <TooltipProvider className="z-[9999] h-full">
+      <div className="bg-[#FDFDFE] border border-[#E5E7EB] p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        {statsLoading ? (
+          <div className="animate-pulse">
+            <div className="h-6 bg-gray-200 rounded w-20 mx-auto mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-32 mx-auto"></div>
+          </div>
+        ) : (
+          <>
+            <p className="mt-2 text-3xl font-semibold">{statsData?.underExamination || "0"}</p>
+            <h3 className="text-sm font-medium text-gray-500 flex items-center gap-1">
+              Under Examination
+              <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <InfoIcon className="h-4 w-4" />
+                    <Icon
+                      icon="tdesign:info-circle-filled"
+                      className="w-4 h-4 text-gray-400 pt-1"
+                    />
                   </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Normal Progress Status</p>
-                  </TooltipContent>
+                  <TooltipContent>Students currently under examination</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            </div>
-          </h3>
-        </div>
+            </h3>
+          </>
+        )}
       </div>
+    </div>
 
       {/* Tab, Search, Table and Pagination */}
       <div className="bg-white py-4 rounded-lg shadow-md mx-6">
