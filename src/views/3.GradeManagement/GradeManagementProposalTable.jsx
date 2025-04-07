@@ -42,6 +42,7 @@ const GradeManagementProposalTable = ({
   const columnHelper = createColumnHelper();
   const [globalFilter, setGlobalFilter] = useState("");
 
+  console.log(data)
 
   const columns = useMemo(
     () => [
@@ -62,8 +63,9 @@ const GradeManagementProposalTable = ({
           </div>
         ),
       }),
-      columnHelper.accessor("defenseDate", {
+      columnHelper.accessor((row) => row.defenses?.[0]?.scheduledDate, {
         header: "Defense Date",
+        id: "defenseDate",
         cell: (info) => info.getValue() ? format(new Date(info.getValue()), "dd-MMM-yyyy") : "-",
       }),
       columnHelper.accessor("status", {
@@ -92,11 +94,11 @@ const GradeManagementProposalTable = ({
       columnHelper.accessor("defenseGrade", {
         header: "Category",
         cell: (info) => {
-          const averageMark = info.row.original.averageDefenseMark;
+          const currentDefense = info.row.original.defenses?.find(d => d.isCurrent);
           let status = 'NOT GRADED';
           
-          if (averageMark !== null && averageMark !== undefined) {
-            status = averageMark >= 60 ? 'PASSED' : 'FAILED';
+          if (currentDefense && currentDefense.verdict) {
+            status = currentDefense.verdict.includes('PASS') ? 'PASSED' : 'FAILED';
           }
 
           return (
