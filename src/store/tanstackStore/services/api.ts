@@ -34,6 +34,18 @@ export const getFacultyProfile = async () => {
     }
 }
 
+export const requestPasswordReset = async (email: string) => {
+    try {
+        const response = await apiRequest.post("/faculty/request-password-reset", { email })
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}
+
+
+
+
 /* ********** STUDENT MANAGEMENT ********** */
 
 export const getAllStudents = async () => {

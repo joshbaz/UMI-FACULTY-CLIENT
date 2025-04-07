@@ -71,7 +71,7 @@ const Sidebar = () => {
   ), [getLinkClassName]);
 
   return (
-    <aside className="w-64 bg-white shadow-lg">
+    <aside className="w-64 bg-white shadow-lg h-screen">
       <div className="h-full flex flex-col">
         <div className="p-4 border-b border-[#ECF6FB]">
           <img src={Logo} alt="UMI Logo" className="w-full h-14" />
@@ -101,9 +101,9 @@ const Sidebar = () => {
           </div>
         </div>
 
-        <nav className="flex-1 p-4">
+        <nav className="flex-1 p-4 overflow-y-auto">
           <div className="space-y-1">
-            <h3 className="px-3 text-xs mb-2 font-[Inter-Medium] text-gray-500  tracking-wider">
+            <h3 className="px-3 text-xs mb-2 font-[Inter-Medium] text-gray-500 tracking-wider">
               Main Activities
             </h3>
             <div className="flex flex-col gap-2 ">
@@ -111,7 +111,7 @@ const Sidebar = () => {
             </div>
 
             <div className="mt-8 flex flex-col gap-2">
-              <h3 className="mt-4 px-3 text-xs font-[Inter-Medium] text-gray-500  tracking-wider">
+              <h3 className="mt-4 px-3 text-xs font-[Inter-Medium] text-gray-500 tracking-wider">
                 Other Options
               </h3>
 
@@ -125,10 +125,10 @@ const Sidebar = () => {
             onClick={handleLogout}
             className="flex items-center justify-between gap-3 px-4 py-2 rounded-md w-full text-[#070B1D] hover:bg-[#ECF6FB]"
           >
-            <span className="text-sm font-[Roboto-Medium]  text-red-700">
+            <span className="text-sm font-[Roboto-Medium] text-red-700">
               Logout
             </span>
-            <span className="rounded-[6px] w-9 h-7 p-2 border border-[#FB3836] bg-red-100  flex items-center justify-center overflow-hidden">
+            <span className="rounded-[6px] w-9 h-7 p-2 border border-[#FB3836] bg-red-100 flex items-center justify-center overflow-hidden">
              <Icon icon="material-symbols:chip-extraction" width="24" height="24" className="text-[#FB3836]" />
             </span>
           </button>

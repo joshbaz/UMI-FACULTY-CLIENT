@@ -18,6 +18,9 @@ import Settings from "./views/5.Settings/Settings";
 import GradeBook from "./views/3.GradeManagement/GradeBook";
 import GradeBookAddInternalExaminer from "./views/3.GradeManagement/GradeBookAddInternalExaminer";
 import FacultyStatsManagement from "./views/6.FacultyStatistics/FacultyStatsManagement";
+import RequestPasswordReset from "./views/0.Auth/RequestPasswordReset";
+import ResetPassword from "./views/0.Auth/ResetPassword";
+// import ResetPassword from "./views/0.Auth/ResetPassword";
 function App() {
   return (
     <>
@@ -41,6 +44,8 @@ function App() {
           </Route>
           <Route  element={<OrdinaryRoutes />}>
             <Route path="/login" element={<Login />} />
+            <Route path="/request-password-reset" element={<RequestPasswordReset />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
           </Route>
         </Routes>
       </Router>
