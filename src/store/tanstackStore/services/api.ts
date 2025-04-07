@@ -34,15 +34,32 @@ export const getFacultyProfile = async () => {
     }
 }
 
-export const requestPasswordReset = async (email: string) => {
+// export const requestPasswordReset = async (email: string) => {
+//     try {
+//         const response = await apiRequest.post("/faculty/request-password-reset", { email })
+//         return response.data
+//     } catch (error) {
+//         errorHandling(error)
+//     }
+// }
+
+export const updateFacultyProfile = async (user: any) => {
     try {
-        const response = await apiRequest.post("/faculty/request-password-reset", { email })
+        const response = await apiRequest.put("/faculty/profile", user)
         return response.data
     } catch (error) {
         errorHandling(error)
     }
 }
 
+export const updateFacultyPassword = async (password: any) => {
+    try {
+        const response = await apiRequest.put("/faculty/password", password)
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}
 
 
 

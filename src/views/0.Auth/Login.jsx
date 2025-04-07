@@ -156,8 +156,8 @@ const Login = () => {
                 </div>
                 <div>
                   <Link
-                    to="/reset-password"
-                    className="text-sm font-medium text-[#CA922D] hover:underline"
+                    to="/request-password-reset"
+                    className="text-sm font-medium text-primary-500 hover:underline"
                   >
                     Forgot password?
                   </Link>
