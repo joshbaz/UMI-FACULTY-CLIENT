@@ -26,21 +26,18 @@ import {
 
 // Defense verdict options
 const REVIEWER_VERDICTS = {
-  PASS: 'PASS',
-  PASS_WITH_MINOR_CORRECTIONS: 'PASS_WITH_MINOR_CORRECTIONS',
-  PASS_WITH_MAJOR_CORRECTIONS: 'PASS_WITH_MAJOR_CORRECTIONS',
-  FAIL: 'FAIL',
- 
+  PASS: "PASS",
+  PASS_WITH_MINOR_CORRECTIONS: "PASS_WITH_MINOR_CORRECTIONS",
+  PASS_WITH_MAJOR_CORRECTIONS: "PASS_WITH_MAJOR_CORRECTIONS",
+  FAIL: "FAIL",
 };
 
 const validationSchema = Yup.object({
   verdict: Yup.string()
     .required("Verdict is required")
     .oneOf(Object.values(REVIEWER_VERDICTS), "Invalid verdict"),
-  comments: Yup.string().required("Comments are required"),
+  comments: Yup.string(), // Made comments optional by removing .required()
 });
-
-
 
 const GradeProposalUpdateReviewerMark = ({
   isOpen,
@@ -52,7 +49,6 @@ const GradeProposalUpdateReviewerMark = ({
   const { data: facultyData } = useGetFacultyProfile();
   const queryClient = useQueryClient();
 
-  
   const initialValues = {
     verdict: "",
     comments: "",
@@ -69,8 +65,13 @@ const GradeProposalUpdateReviewerMark = ({
   }, [reviewer, proposal?.reviewGrades]);
 
   const submitGradeMutation = useMutation({
-    mutationFn: async (gradeData) => addReviewerMarkService(gradeData.proposalId, gradeData.gradedById, gradeData.verdict, gradeData.feedback)
-    ,
+    mutationFn: async (gradeData) =>
+      addReviewerMarkService(
+        gradeData.proposalId,
+        gradeData.gradedById,
+        gradeData.verdict,
+        gradeData.feedback
+      ),
     onSuccess: () => {
       queryClient.resetQueries({ queryKey: ["proposal", proposalId] });
       onClose();
@@ -104,7 +105,7 @@ const GradeProposalUpdateReviewerMark = ({
     const gradeData = {
       proposalId,
       verdict: values.verdict,
-      feedback: values.comments,
+      feedback: values.comments || "", // Ensure empty string if comments is null/undefined
       gradedById: reviewer.id,
       submittedById: facultyData?.faculty?.id,
     };
@@ -180,7 +181,7 @@ const GradeProposalUpdateReviewerMark = ({
                   <SelectContent>
                     {Object.entries(REVIEWER_VERDICTS).map(([key, value]) => (
                       <SelectItem key={key} value={value}>
-                        {value.replace(/_/g, ' ')}
+                        {value.replace(/_/g, " ")}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -193,12 +194,12 @@ const GradeProposalUpdateReviewerMark = ({
               {/* Comments */}
               <div className="space-y-2">
                 <Label className="text-sm font-[Inter-Regular] text-gray-800">
-                  Comments
+                  Comments (Optional)
                 </Label>
                 <Field
                   as={Textarea}
                   name="comments"
-                  placeholder="Please enter the reviewer's feedback"
+                  placeholder="Please enter the reviewer's feedback (optional)"
                   rows={4}
                   className="text-sm font-[Inter-Regular] !ring-0 
     !ring-offset-0 
@@ -214,7 +215,7 @@ const GradeProposalUpdateReviewerMark = ({
               </div>
 
               {/* Last Update Info */}
-              <div className="flex items-center gap-2 text-sm font-[Inter-Regular] text-gray-500">
+              {/* <div className="flex items-center gap-2 text-sm font-[Inter-Regular] text-gray-500">
                 <span>
                   Last Update: {format(new Date(), "MM/dd/yyyy hh:mm:ss aa")}
                 </span>
@@ -222,7 +223,7 @@ const GradeProposalUpdateReviewerMark = ({
                 <span>
                   Updated by {facultyData?.faculty?.name || "DHIMS System"}
                 </span>
-              </div>
+              </div> */}
 
               {/* Submit Button */}
               <Button

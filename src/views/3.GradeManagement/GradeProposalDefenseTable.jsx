@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 // Defense status constants
 const DEFENSE_STATUS = {
   SCHEDULED: 'SCHEDULED',
@@ -61,10 +61,11 @@ const GradeProposalDefenseTable = ({
   
   refetchProposal, 
   onUpdateClick, 
-  onViewClick 
+  onViewClick,
+  isProposalActive
 }) => {
   const { id: proposalId } = useParams();
-
+  const navigate = useNavigate();
   console.log(proposalId);
   const [isScheduleDefenseOpen, setIsScheduleDefenseOpen] = useState(false);
   const [isVerdictDialogOpen, setIsVerdictDialogOpen] = useState(false);
@@ -271,13 +272,14 @@ const GradeProposalDefenseTable = ({
           <button
             onClick={() => handleRecordVerdict(row.original.id)}
             className="text-primary-600 font-[Inter-Medium] border border-primary-600 rounded-sm px-2 py-1 hover:text-primary-700"
+            disabled={!isProposalActive}
           >
             Record Verdict
           </button>
         )
       )
     }
-  ], [handleRecordVerdict]);
+  ], [handleRecordVerdict, isProposalActive]);
 
   // Initialize TanStack Table
   const table = useReactTable({
@@ -294,7 +296,8 @@ const GradeProposalDefenseTable = ({
   });
 
   const toggleScheduleDialog = useCallback(() => {
-    setIsScheduleDefenseOpen(prev => !prev);
+    // setIsScheduleDefenseOpen(prev => !prev);
+    navigate(`/grades/proposal/schedule-defense/${proposalId}`);
   }, []);
 
   return (
@@ -302,8 +305,9 @@ const GradeProposalDefenseTable = ({
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-[Inter-Medium]">Defense Details</h3>
         <button
-          className="px-3 py-1.5 text-sm font-[Inter-Medium] text-white bg-primary-600 rounded hover:bg-primary-700"
+          className="px-3 py-1.5 text-sm font-[Inter-Medium] text-white bg-primary-600 rounded hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={toggleScheduleDialog}
+          disabled={!isProposalActive}
         >
           {defenseHistory?.length > 0 ? 'Reschedule Defense' : 'Schedule Defense'}
         </button>

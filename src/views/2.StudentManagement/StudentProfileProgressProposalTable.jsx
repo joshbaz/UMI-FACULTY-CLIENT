@@ -203,6 +203,14 @@ console.log('proposals',proposals);
         );
       },
     }),
+    columnHelper.accessor("isCurrent", {
+      header: "State",
+      cell: (info) => (
+        <span className={`text-xs font-medium px-2 py-1 rounded-md ${info.getValue() ? "text-green-600 bg-green-50" : "text-red-500 bg-red-100"}`}>
+          {info.getValue() ? "Active" : "Inactive"}
+        </span>
+      ),
+    }),
     columnHelper.accessor("id", {
       header: "",
       cell: (info) => (
@@ -232,6 +240,20 @@ console.log('proposals',proposals);
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+
+  // Check if the current proposal has a failed status and review is finished
+  const hasFailedProposalReviewFinished = useMemo(() => {
+    if (!proposals || proposals.length === 0) return false;
+
+    console.log('proposals',proposals);
+    
+    // Get the most recent proposal
+    const latestProposal = proposals.find(proposal => proposal.isCurrent) || proposals[0];
+    const statuses = latestProposal.statuses || [];
+    const currentStatus = statuses.length > 0 ? statuses[statuses.length - 1] : null;
+    
+    return currentStatus?.definition?.name?.toLowerCase() === 'failed-proposal review finished';
+  }, [proposals]);
 
   if (isLoadingProposals) {
     return (
@@ -264,6 +286,7 @@ console.log('proposals',proposals);
             className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
+        <div className="flex items-center gap-2">
         <select
           value={pageSize}
           onChange={e => table.setPageSize(Number(e.target.value))}
@@ -275,6 +298,23 @@ console.log('proposals',proposals);
             </option>
           ))}
         </select>
+        {/** resubmit proposal button */}
+        <div className="flex items-center">
+          {hasFailedProposalReviewFinished && (
+            <button 
+            onClick={handleSubmitProposal} 
+            className={`px-4 py-2 ${hasFailedProposalReviewFinished ? 'bg-[#DC2626] hover:bg-red-700' : 'bg-[#23388F] hover:bg-blue-700'} text-white text-sm font-medium rounded-lg flex items-center gap-2`}
+            disabled={!hasFailedProposalReviewFinished && proposals.length > 0}
+          >
+            <Icon icon="material-symbols:add" width="18" height="18" />
+            {hasFailedProposalReviewFinished ? 'Resubmit Proposal (Required)' : 'Resubmit Proposal'}
+          </button>
+          )}
+          
+        </div>
+
+        </div>
+    
       </div>
 
       <table className="w-full ">
@@ -297,7 +337,7 @@ console.log('proposals',proposals);
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
+            <tr key={row.id}  className={!row.original.isCurrent ? "bg-gray-50" : ""}>
               {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}

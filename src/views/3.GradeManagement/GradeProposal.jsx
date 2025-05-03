@@ -90,6 +90,11 @@ const GradeProposal = () => {
     [proposal?.proposal?.statuses]
   );
 
+  const isProposalActive = useMemo(
+    () => !!proposal?.proposal?.isCurrent,
+    [proposal?.proposal?.isCurrent]
+  );
+
   const { totalDays, expectedDays } = useMemo(() => {
     const statusDate = currentStatus?.createdAt
       ? new Date(currentStatus.createdAt)
@@ -106,14 +111,22 @@ const GradeProposal = () => {
   }, [proposal?.proposal?.reviewers]);
 
   const handleReviewerUpdateClick = useCallback((reviewer) => {
+    if (!isProposalActive) {
+      toast.error("Cannot update reviewers for inactive proposals");
+      return;
+    }
     setSelectedReviewer(reviewer);
     setIsUpdateReviewerDrawerOpen(true);
-  }, []);
+  }, [isProposalActive]);
 
   const handlePanelistUpdateClick = useCallback((panelist) => {
+    if (!isProposalActive) {
+      toast.error("Cannot update panelists for inactive proposals");
+      return;
+    }
     setSelectedPanelist(panelist);
     setIsUpdatePanelistDrawerOpen(true);
-  }, []);
+  }, [isProposalActive]);
 
   const handleViewReviewerClick = useCallback((reviewer) => {
     setSelectedReviewer(reviewer);
@@ -182,6 +195,11 @@ const GradeProposal = () => {
                 {`${proposal?.proposal?.student?.firstName} ${proposal?.proposal?.student?.lastName}` || "Loading..."}
               </span>
             </div>
+            {!isProposalActive && (
+              <div className="bg-amber-100 text-amber-800 px-3 py-1 rounded-md text-sm">
+                This proposal is inactive. Some actions are disabled.
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -242,8 +260,9 @@ const GradeProposal = () => {
                   : "Not Available"}
               </span>
               <button
-                className="px-2 py-1 text-xs font-[Inter-Medium] text-white bg-accent2-600 rounded hover:bg-accent2-700"
-                onClick={() => setIsComplianceReportDialogOpen(true)}
+                className={`px-2 py-1 text-xs font-[Inter-Medium] text-white rounded ${isProposalActive ? 'bg-accent2-600 hover:bg-accent2-700' : 'bg-gray-400 cursor-not-allowed'}`}
+                onClick={() => isProposalActive ? setIsComplianceReportDialogOpen(true) : toast.error("Cannot update compliance report for inactive proposals")}
+                disabled={!isProposalActive}
               >
                 {proposal?.proposal?.complianceReportDate ? "Update" : "Add Date"}
               </button>
@@ -261,8 +280,9 @@ const GradeProposal = () => {
                   : "Not Available"}
               </span>
               <button 
-                className="px-2 py-1 text-xs font-[Inter-Medium] text-white bg-accent2-600 rounded hover:bg-accent2-700"
-                onClick={() => setIsFieldLetterDialogOpen(true)}
+                className={`px-2 py-1 text-xs font-[Inter-Medium] text-white rounded ${isProposalActive ? 'bg-accent2-600 hover:bg-accent2-700' : 'bg-gray-400 cursor-not-allowed'}`}
+                onClick={() => isProposalActive ? setIsFieldLetterDialogOpen(true) : toast.error("Cannot generate field letter for inactive proposals")}
+                disabled={!isProposalActive}
               >
                 Generate
               </button>
@@ -280,8 +300,9 @@ const GradeProposal = () => {
                   : "Not Available"}
               </span>
               <button 
-                className="px-2 py-1 text-xs font-[Inter-Medium] text-white bg-accent2-600 rounded hover:bg-accent2-700"
-                onClick={() => setIsFieldLetterDateDialogOpen(true)}
+                className={`px-2 py-1 text-xs font-[Inter-Medium] text-white rounded ${isProposalActive ? 'bg-accent2-600 hover:bg-accent2-700' : 'bg-gray-400 cursor-not-allowed'}`}
+                onClick={() => isProposalActive ? setIsFieldLetterDateDialogOpen(true) : toast.error("Cannot update field letter date for inactive proposals")}
+                disabled={!isProposalActive}
               >
                 {proposal?.proposal?.fieldLetterDate ? "Update" : "Add Date"}
               </button>
@@ -302,12 +323,14 @@ const GradeProposal = () => {
               onUpdateClick={handleReviewerUpdateClick} 
               reviewGrades={proposal?.proposal?.reviewGrades} 
               onViewClick={handleViewReviewerClick} 
+              isProposalActive={isProposalActive}
             />
           )}
           
           {activeTab === "Proposal defense" && (
             <GradeProposalDefenseTable 
-              proposalId={proposalId} 
+              proposalId={proposalId}
+              isProposalActive={isProposalActive}
             />
           )}
           
@@ -318,16 +341,17 @@ const GradeProposal = () => {
               onUpdateClick={handlePanelistUpdateClick} 
               defenseGrades={proposal?.proposal?.defenseGrades} 
               onViewClick={handleViewPanelistClick} 
+              isProposalActive={isProposalActive}
             />
           )} */}
         </div>
       </div>
 
       {/** Update Reviewer Mark */}
-      <GradeProposalUpdateReviewerMark isOpen={isUpdateReviewerDrawerOpen} onClose={() => setIsUpdateReviewerDrawerOpen(false)} reviewer={selectedReviewer} proposalId={proposalId} proposal={proposal?.proposal} />
+      <GradeProposalUpdateReviewerMark isOpen={isUpdateReviewerDrawerOpen} onClose={() => setIsUpdateReviewerDrawerOpen(false)} reviewer={selectedReviewer} proposalId={proposalId} proposal={proposal?.proposal}  />
 
       {/** View Reviewer Mark */}
-      <GradeProposalViewReviewerMark isOpen={isViewReviewerDrawerOpen} onClose={() => setIsViewReviewerDrawerOpen(false)} reviewer={selectedReviewer} proposalId={proposalId} proposal={proposal?.proposal} />
+      <GradeProposalViewReviewerMark isOpen={isViewReviewerDrawerOpen} onClose={() => setIsViewReviewerDrawerOpen(false)} reviewer={selectedReviewer} proposalId={proposalId} proposal={proposal?.proposal} isProposalActive={isProposalActive} />
 
       {/** Update Panelist Mark */}
       {/* <GradeProposalUpdatePanelistMark isOpen={isUpdatePanelistDrawerOpen} onClose={() => setIsUpdatePanelistDrawerOpen(false)} panelist={selectedPanelist} proposalId={proposalId} proposal={proposal} /> */}

@@ -108,6 +108,14 @@ const GradeManagementProposalTable = ({
           );
         },
       }),
+      columnHelper.accessor("isCurrent", {
+        header: "State",
+        cell: (info) => (
+          <span className={`text-xs font-medium px-2 py-1 rounded-md ${info.getValue() ? "text-green-600 bg-green-50" : "text-red-500 bg-red-100"}`}>
+            {info.getValue() ? "Active" : "Inactive"}
+          </span>
+        ),
+      }),
       columnHelper.display({
         id: "actions",
         header: "",
@@ -206,7 +214,10 @@ const GradeManagementProposalTable = ({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
+              <tr 
+                key={row.id} 
+                className={!row.original.isCurrent ? "bg-gray-50" : ""}
+              >
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}

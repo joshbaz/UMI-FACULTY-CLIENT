@@ -44,6 +44,7 @@ const GradeProposalViewReviewerMark = ({
   reviewer,
   proposalId,
   proposal,
+  isProposalActive,
 }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { data: facultyData } = useGetFacultyProfile();
@@ -179,13 +180,17 @@ const GradeProposalViewReviewerMark = ({
          
 
             {/* Edit Button */}
-            <Button
-              onClick={() => setIsEditModalOpen(true)}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Pencil className="w-4 h-4 mr-2" />
-              Edit Report
-            </Button>
+            {
+              isProposalActive && ( <Button
+                onClick={() => setIsEditModalOpen(true)}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Pencil className="w-4 h-4 mr-2" />
+                Edit Report
+              </Button>)
+
+            }
+           
           </div>
         </SheetContent>
       </Sheet>

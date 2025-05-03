@@ -21,6 +21,7 @@ import FacultyStatsManagement from "./views/6.FacultyStatistics/FacultyStatsMana
 import RequestPasswordReset from "./views/0.Auth/RequestPasswordReset";
 import ResetPassword from "./views/0.Auth/ResetPassword";
 import GradeProposalAddReviewers from "./views/3.GradeManagement/GradeProposalAddReviewers";
+import GradeProposalScheduleDefense from "./views/3.GradeManagement/GradeProposalScheduleDefense";
 // import ResetPassword from "./views/0.Auth/ResetPassword";
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
             <Route path="grades" element={<GradeManagement />} />
             <Route path="grades/proposal/:id" element={<GradeProposal />} />
             <Route path="grades/proposal/add-reviewer/:id" element={<GradeProposalAddReviewers />} />
+            <Route path="grades/proposal/schedule-defense/:id" element={<GradeProposalScheduleDefense />} />
             <Route path="grades/book/:id" element={<GradeBook />} />
            
             <Route path="grades/book/add-internal-examiner/:id" element={<GradeBookAddInternalExaminer />} />

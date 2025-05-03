@@ -6,6 +6,12 @@ import { toast } from "sonner";
 import { useGetProposal, useGetReviewers } from "../../store/tanstackStore/services/queries";
 import { createReviewerService, addReviewersService } from "../../store/tanstackStore/services/api";
 import { queryClient } from "@/utils/tanstack";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  createColumnHelper
+} from "@tanstack/react-table";
 // import { Icon } from "@iconify/react";
 
 const GradeProposalAddReviewers = () => {
@@ -23,8 +29,7 @@ const GradeProposalAddReviewers = () => {
   const [newReviewer, setNewReviewer] = useState({
     name: "",
     email: "",
-    secondaryEmail: "",
-    phone: "",
+    primaryPhone: "",
     secondaryPhone: "",
     institution: "Uganda Management Institute",
     specialization: ""
@@ -57,6 +62,7 @@ const GradeProposalAddReviewers = () => {
   // Query to fetch all reviewers
   const { data: reviewersData, isLoading: isReviewersLoading, error: reviewersError } = useGetReviewers();
 
+ 
   // Mutation for assigning reviewers
   const addReviewersMutation = useMutation({
     mutationFn: () => addReviewersService(proposalId, selectedReviewers),
@@ -93,8 +99,7 @@ const GradeProposalAddReviewers = () => {
       setNewReviewer({ 
         name: "", 
         email: "", 
-        secondaryEmail: "", 
-        phone: "", 
+        primaryPhone: "", 
         secondaryPhone: "", 
         institution: "Uganda Management Institute",
         specialization: ""
@@ -182,6 +187,53 @@ const GradeProposalAddReviewers = () => {
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
+
+  // TanStack Table setup
+  const columnHelper = createColumnHelper();
+  
+  const columns = [
+    columnHelper.accessor('name', {
+      header: 'Name',
+      cell: info => <div className="text-sm font-medium text-gray-900">{info.getValue()}</div>
+    }),
+    columnHelper.accessor('email', {
+      header: 'Email',
+      cell: info => <div className="text-sm text-gray-500">{info.getValue()}</div>
+    }),
+    columnHelper.accessor('institution', {
+      header: 'Institution',
+      cell: info => <div className="text-sm text-gray-500">{info.getValue()}</div>
+    }),
+    columnHelper.accessor('specialization', {
+      header: 'Specialization',
+      cell: info => <div className="text-sm text-gray-500">{info.getValue() || "Not specified"}</div>
+    }),
+    columnHelper.accessor('id', {
+      header: 'Action',
+      cell: info => {
+        const reviewer = info.row.original;
+        const isSelected = selectedReviewers.some(r => r.id === reviewer.id);
+        return (
+          <button
+            onClick={() => handleAssignToggle(reviewer)}
+            className={`px-3 py-1 text-xs font-medium rounded-md ${
+              isSelected
+                ? 'bg-red-100 text-red-800 hover:bg-red-200'
+                : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+            }`}
+          >
+            {isSelected ? 'Unassign' : 'Assign'}
+          </button>
+        );
+      }
+    })
+  ];
+
+  const table = useReactTable({
+    data: paginatedReviewers,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   if (isProposalLoading || isReviewersLoading) {
     return <div className="p-6">Loading...</div>;
@@ -287,67 +339,50 @@ const GradeProposalAddReviewers = () => {
           </div>
 
           <div className="px-6">
-            {/* Reviewer Table */}
+            {/* Reviewer Table using TanStack Table */}
             <div className="min-w-full overflow-hidden border border-gray-200 rounded-lg">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Institution
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Specialization
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Action
-                    </th>
-                  </tr>
+                  {table.getHeaderGroups().map(headerGroup => (
+                    <tr key={headerGroup.id}>
+                      {headerGroup.headers.map(header => (
+                        <th 
+                          key={header.id}
+                          scope="col" 
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                        </th>
+                      ))}
+                    </tr>
+                  ))}
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedReviewers.length > 0 ? (
-                    paginatedReviewers.map((reviewer) => {
-                      const isSelected = selectedReviewers.some(r => r.id === reviewer.id);
+                  {table.getRowModel().rows.length > 0 ? (
+                    table.getRowModel().rows.map(row => {
+                      const isSelected = selectedReviewers.some(r => r.id === row.original.id);
                       return (
                         <tr 
-                          key={reviewer.id} 
+                          key={row.id} 
                           className={`hover:bg-gray-50 ${isSelected ? 'bg-blue-50' : ''}`}
                         >
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">{reviewer.name}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-500">{reviewer.email}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-500">{reviewer.institution}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-500">{reviewer.specialization || "Not specified"}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <button
-                              onClick={() => handleAssignToggle(reviewer)}
-                              className={`px-3 py-1 text-xs font-medium rounded-md ${
-                                isSelected
-                                  ? 'bg-red-100 text-red-800 hover:bg-red-200'
-                                  : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-                              }`}
-                            >
-                              {isSelected ? 'Unassign' : 'Assign'}
-                            </button>
-                          </td>
+                          {row.getVisibleCells().map(cell => (
+                            <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </td>
+                          ))}
                         </tr>
                       );
                     })
                   ) : (
                     <tr>
-                      <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                      <td colSpan={columns.length} className="px-6 py-8 text-center text-gray-500">
                         <div className="text-sm font-medium">No reviewers found</div>
                         <div className="text-xs mt-1">Please add a new reviewer or adjust your search criteria</div>
                       </td>
@@ -458,34 +493,19 @@ const GradeProposalAddReviewers = () => {
                 />
               </div>
               
-              <div className="mb-4 grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Primary Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={newReviewer.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="john.smith@work.com"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Secondary Email
-                  </label>
-                  <input
-                    type="email"
-                    name="secondaryEmail"
-                    value={newReviewer.secondaryEmail}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="john.smith@personal.com"
-                  />
-                </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={newReviewer.email}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="john.smith@example.com"
+                />
               </div>
               
               <div className="mb-4 grid grid-cols-2 gap-4">
@@ -495,8 +515,8 @@ const GradeProposalAddReviewers = () => {
                   </label>
                   <input
                     type="tel"
-                    name="phone"
-                    value={newReviewer.phone}
+                    name="primaryPhone"
+                    value={newReviewer.primaryPhone}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="+1 (555) 123-4567"

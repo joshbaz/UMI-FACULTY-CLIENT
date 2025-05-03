@@ -149,7 +149,7 @@ const ReviewerItem = memo(({ reviewer, isSelected, onSelect }) => (
 ));
 
 {/** Main- Grade Proposal Reviewer Table */}
-const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, reviewGrades, onViewClick }) => {
+const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, reviewGrades, onViewClick, isProposalActive }) => {
   const [globalFilter, setGlobalFilter] = useState('')
   const [pageIndex, setPageIndex] = useState(0)
   const [pageSize, setPageSize] = useState(10)
@@ -369,14 +369,16 @@ const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, revi
               <>
                 <button
                   onClick={() => onUpdateClick(info.row.original)}
-                  className="rounded border text-gray-700 border-semantic-bg-border shadow-sm py-1 px-2 hover:bg-gray-50 font-[Inter-Medium] text-sm"
+                  className="rounded border text-gray-700 border-semantic-bg-border shadow-sm py-1 px-2 hover:bg-gray-50 font-[Inter-Medium] text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!isProposalActive}
                 >
                   Update
                 </button>
 
                 <button
                   onClick={() => handleOpenDelete(info.row.original)}
-                  className="rounded py-1 px-2 border border-[#FB3836] text-red-800 bg-red-100 flex items-center justify-center overflow-hidden"
+                  className="rounded py-1 px-2 border border-[#FB3836] text-red-800 bg-red-100 flex items-center justify-center overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!isProposalActive}
                 >
                   Delete
                 </button>
@@ -386,7 +388,7 @@ const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, revi
         );
       }
     },
-  ], [handleOpenDelete, reviewGrades])
+  ], [handleOpenDelete, reviewGrades, isProposalActive])
 
   const handlePaginationChange = useCallback((updater) => {
     if (typeof updater === 'function') {
@@ -461,7 +463,8 @@ const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, revi
           <button 
             // onClick={() => setIsReviewerModalOpen(true)}
             onClick={() => navigate(`/grades/proposal/add-reviewer/${proposalId}`)}
-            className="px-4 py-2 bg-transparent text-sm font-[Inter-Medium] border border-primary-500 text-primary-500 rounded-md hover:bg-primary-100  focus:outline-none focus:ring-2 focus:ring-primary-500 flex items-center gap-2"
+            className="px-4 py-2 bg-transparent text-sm font-[Inter-Medium] border border-primary-500 text-primary-500 rounded-md hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+            disabled={!isProposalActive}
           >
             <UserPlus size={16} />
             Add Reviewers
