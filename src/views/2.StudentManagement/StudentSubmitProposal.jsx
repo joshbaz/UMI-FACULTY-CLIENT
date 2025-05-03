@@ -13,8 +13,8 @@ const validationSchema = Yup.object().shape({
   description: Yup.string(),
   submissionDate: Yup.date()
     .required('Submission date is required'),
-  researchArea: Yup.string()
-    .required('Research area is required'),
+  // researchArea: Yup.string()
+  //   .required('Research area is required'),
   // file: Yup.mixed()
   //   .test('fileSize', 'File size must be less than 500MB', value => {
   //     if (!value) return true;
@@ -108,14 +108,26 @@ let navigate = useNavigate();
                 </div>
                 <div>
                   <label htmlFor="researchArea" className="block text-sm font-medium text-gray-700 mb-1">
-                    Research Area
+                    Research Area (Optional)
                   </label>
                   <Field
-                    type="text"
+                    as="select"
                     id="researchArea"
                     name="researchArea"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
+                  >
+                    <option value="">Select a research area</option>
+                    <option value="Business Strategy">Business Strategy</option>
+                    <option value="Organizational Behavior">Organizational Behavior</option>
+                    <option value="Marketing Management">Marketing Management</option>
+                    <option value="Financial Management">Financial Management</option>
+                    <option value="Human Resource Management">Human Resource Management</option>
+                    <option value="Public Administration">Public Administration</option>
+                    <option value="Public Policy">Public Policy</option>
+                    <option value="Management Science">Management Science</option>
+                    <option value="Operations Management">Operations Management</option>
+                    <option value="Supply Chain Management">Supply Chain Management</option>
+                  </Field>
                   {errors.researchArea && touched.researchArea && (
                     <div className="text-red-500 text-sm mt-1">{errors.researchArea}</div>
                   )}

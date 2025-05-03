@@ -34,7 +34,7 @@ const getCategoryStyle = (status) => {
   const columnHelper = createColumnHelper();
   const columns = [
     columnHelper.accessor("bookCode", {
-      header: "Book ID",
+      header: "ID",
       cell: (info) => (
         <span className="whitespace-nowrap text-primary-500 font-[Inter-Medium]">
           {info.getValue() || "Untitled"}
@@ -42,7 +42,7 @@ const getCategoryStyle = (status) => {
       ),
     }),
     columnHelper.accessor("title", {
-      header: "Book Title",
+      header: "Title",
       cell: (info) => (
         <span className="whitespace-normal break-words max-w-[200px] line-clamp-4">
           {info.getValue() || "Untitled"}

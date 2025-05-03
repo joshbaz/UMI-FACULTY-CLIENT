@@ -174,6 +174,16 @@ export const addComplianceReportDateService = async (proposalId: string, complia
 
 /* ********** REVIEWER MANAGEMENT ********** */
 
+export const createReviewerService = async ()=> {
+    try {
+        const response = await apiRequest.post(`/faculty/reviewers`)
+        return response.data
+        
+    } catch (error) {
+        errorHandling(error)
+    }
+}
+
 export const addReviewersService = async (proposalId: string, reviewers: any) => {
     try {
         const response = await apiRequest.post(`/faculty/reviewers/${proposalId}`, { reviewers })

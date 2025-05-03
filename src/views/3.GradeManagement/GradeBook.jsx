@@ -73,7 +73,7 @@ const GradeBook = () => {
       <div className="flex items-center justify-center h-screen gap-2">
         <Loader2 className="h-4 w-4 animate-spin text-green-900" />
         <div className="text-lg font-[Inter-Medium] text-gray-600">
-          Loading book data...
+          Loading dissertation data...
         </div>
       </div>
     );
@@ -82,7 +82,7 @@ const GradeBook = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="text-red-500">Error loading book data</div>
+        <div className="text-red-500">Error loading dissertation data</div>
       </div>
     );
   }
@@ -94,7 +94,7 @@ const GradeBook = () => {
 
       {/* Header */}
       <div className="flex justify-between items-center px-6 py-1">
-        <h1 className="text-2xl font-[Inter-Medium]">Book</h1>
+        <h1 className="text-2xl font-[Inter-Medium]">Dissertation Examination</h1>
         <span className="text-sm font-[Inter-Regular] text-gray-500">
           Last login: {format(new Date(), "MM-dd-yyyy hh:mm:ssaa")}
         </span>
@@ -123,7 +123,7 @@ const GradeBook = () => {
       <div className="grid grid-cols-3 px-6">
         <div>
           <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
-            Book ID
+             ID
           </h3>
           <div className="flex gap-2">
             <span className="text-sm font-[Inter-Regular] text-gray-900">

@@ -1,8 +1,8 @@
 
 import axios from 'axios'
 
-// export const BASE_API_URL = 'http://localhost:5000/api/v1';
-export const BASE_API_URL = 'https://umiapi.alero.co.ke/api/v1';
+export const BASE_API_URL = 'http://localhost:5000/api/v1';
+// export const BASE_API_URL = 'https://umiapi.alero.co.ke/api/v1';
 
 export const socketUrl = "localhost:5000"
 

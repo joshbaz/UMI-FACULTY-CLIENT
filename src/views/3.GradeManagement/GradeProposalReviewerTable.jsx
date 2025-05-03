@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { debounce } from 'lodash';
+import { useNavigate, useParams } from 'react-router-dom'
 
 const SearchInput = memo(({ value, onChange, placeholder }) => (
   <Input
@@ -159,6 +160,8 @@ const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, revi
   const [searchTerm, setSearchTerm] = useState("")
   const [manualReviewer, setManualReviewer] = useState({ name: "", email: "" })
   const [selectedReviewers, setSelectedReviewers] = useState([])
+  let navigate = useNavigate()
+    // const { id: proposalId } = useParams();
 
   const { data: reviewersData, isLoading: isLoadingReviewers } = useGetReviewers()
   let queryClient = useQueryClient()
@@ -456,7 +459,8 @@ const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, revi
           </div>
          
           <button 
-            onClick={() => setIsReviewerModalOpen(true)}
+            // onClick={() => setIsReviewerModalOpen(true)}
+            onClick={() => navigate(`/grades/proposal/add-reviewer/${proposalId}`)}
             className="px-4 py-2 bg-transparent text-sm font-[Inter-Medium] border border-primary-500 text-primary-500 rounded-md hover:bg-primary-100  focus:outline-none focus:ring-2 focus:ring-primary-500 flex items-center gap-2"
           >
             <UserPlus size={16} />
