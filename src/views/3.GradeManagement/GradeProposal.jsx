@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { queryClient } from "../../utils/tanstack";
 import GradeProposalGenerateFieldLetter from "./GradeProposalGenerateFieldLetter";
 import GradeProposalDefenseTable from "./GradeProposalDefenseTable";
+
 const GradeProposal = () => {
   let navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Reviewers");

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals, getAllExaminersService, getExaminerService, getBookService, getStudentBooksService, getAllBooksService, getProgressTrendsService, getStatusStatisticsService, getDashboardStatsService, getNotificationsService, getProposalDefensesService, getAllSupervisorsService, } from './api.js';
+import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals, getAllExaminersService, getExaminerService, getBookService, getStudentBooksService, getAllBooksService, getProgressTrendsService, getStatusStatisticsService, getDashboardStatsService, getNotificationsService, getProposalDefensesService, getAllSupervisorsService, getChairpersonsService, getExternalPersonsService, getExternalPersonsByRoleService, } from './api.js';
 
 // Common options for most queries
 function getDefaultQueryOptions() {
@@ -118,6 +118,22 @@ export function useGetPanelists() {
     networkMode: 'online',
   });
 }
+
+
+/* ********** CHAIRPERSON MANAGEMENT ********** */
+
+export function useGetChairpersons() {
+  return useQuery({
+    queryKey: ['chairpersons'],
+    queryFn: getChairpersonsService,
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+    networkMode: 'online',
+  });
+}
+
+/* ********** END OF CHAIRPERSON MANAGEMENT ********** */
+
 
 
 
@@ -243,3 +259,29 @@ export const useGetAllSupervisors = () => {
     refetchInterval: false,
   });
 };
+
+/* ********** CHAIRPERSON MANAGEMENT ********** */
+
+
+/* ********** EXTERNAL PERSONS MANAGEMENT ********** */
+export const useGetExternalPersons = () => {
+  return useQuery({
+    queryKey: ['externalPersons'],
+    queryFn: getExternalPersonsService,
+    staleTime: 300000, // 5 minutes
+    refetchInterval: false,
+    retry: 1,
+  });
+};
+
+export const useGetExternalPersonsByRole = (role: string) => {
+  return useQuery({
+    queryKey: ['externalPersons', role],
+    queryFn: () => getExternalPersonsByRoleService(role),
+    enabled: Boolean(role), // Only run if role exists
+    staleTime: 300000, // 5 minutes
+    refetchInterval: false,
+    retry: 1,
+  });
+};
+

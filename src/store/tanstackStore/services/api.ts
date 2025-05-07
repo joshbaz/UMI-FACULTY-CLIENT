@@ -411,6 +411,29 @@ export const getStudentBooksService = async (studentId: string) => {
   }
 }
 
+/** Chairperson */
+export const getChairpersonsService = async () => {
+  try {
+    const response = await apiRequest.get('/faculty/chairperson');
+    return response.data;
+  } catch (error) {
+    errorHandling(error);
+  }
+}
+
+export const createChairpersonService = async (name: string, email: string) => {
+  try {
+    const response = await apiRequest.post('/faculty/chairperson', {
+      name,
+      email
+    });
+    return response.data;
+  } catch (error) {
+    errorHandling(error);
+  }
+}
+
+
 
 
 
@@ -467,15 +490,33 @@ export const getNotificationsService = async () => {
 
 
 /* ********** PROPOSAL DEFENSE MANAGEMENT ********** */
-
-export const scheduleProposalDefenseService = async (proposalId: string, scheduledDate: string, panelistIds: any) => {
-    try {
-        const response = await apiRequest.post(`/faculty/proposals/${proposalId}/defenses`, { scheduledDate, panelistIds });
-        return response.data;
-    } catch (error) {
-        errorHandling(error);
-    }
-}
+ // Start of Selection
+export const scheduleProposalDefenseService = async (
+  proposalId: string,
+  scheduledDate: string,
+  details: {
+    location: string;
+    chairpersonId: string;
+    minutesSecretaryId: string;
+    panelistIds: string[];
+    reviewerIds: string[];
+  }
+) => {
+  try {
+    const payload = {
+      scheduledDate,
+      ...details,
+    };
+    const response = await apiRequest.post(
+      `/faculty/proposals/${proposalId}/defenses`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    errorHandling(error);
+    throw error;
+  }
+};
 
 export const recordProposalDefenseVerdictService = async (defenseId: string, verdict: string, comments: string) => {
     try {
@@ -505,4 +546,54 @@ export const getAllSupervisorsService = async () => {
         errorHandling(error);
     }
 };
+
+/* ********** EXTERNAL PERSONS MANAGEMENT ********** */
+
+export const getExternalPersonsService = async () => {
+    try {
+        const response = await apiRequest.get('/faculty/external-persons');
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+export const getExternalPersonsByRoleService = async (role: string) => {
+    try {
+        const response = await apiRequest.get(`/faculty/external-persons/${role}`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+export const createExternalPersonService = async (name: string, email: string, role: string) => {
+    try {
+        const response = await apiRequest.post('/faculty/external-person', { name, email, role });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+export const updateExternalPersonService = async (id: string, data: { name?: string, email?: string, role?: string, isActive?: boolean }) => {
+    try {
+        const response = await apiRequest.put(`/faculty/external-person/${id}`, data);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+export const deleteExternalPersonService = async (id: string) => {
+    try {
+        const response = await apiRequest.delete(`/faculty/external-person/${id}`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+/* ********** END OF EXTERNAL PERSONS MANAGEMENT ********** */
+
 

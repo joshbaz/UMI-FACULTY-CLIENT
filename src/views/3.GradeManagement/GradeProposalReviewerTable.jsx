@@ -300,17 +300,17 @@ const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, revi
   }, [selectedReviewer, proposalId, deleteReviewerMutation])
 
   const columns = useMemo(() => [
-    {
-      header: 'Name',
-      accessorKey: 'name',
-      cell: (info) => info.getValue(),
-    },
-    {
-      header: 'Email',
-      accessorKey: 'email',
-      cell: (info) => info.getValue(),
-    },
-    {
+      {
+        header: 'Name',
+        accessorKey: 'name',
+        cell: (info) => info.getValue(),
+      },
+      {
+        header: 'Email',
+        accessorKey: 'email',
+        cell: (info) => info.getValue(),
+      },
+      {
       header: 'Comments',
       accessorKey: 'comments',
       cell: (info) => {
@@ -341,7 +341,7 @@ const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, revi
     },
     {
       header: 'Updated',
-      accessorKey: 'updatedAt',
+        accessorKey: 'updatedAt',
       cell: (info) => {
         const reviewerId = info.row.original.id;
         const grade = reviewGrades.find(grade => grade.gradedById === reviewerId);
@@ -447,17 +447,17 @@ const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, revi
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-1">
             <span className="text-sm font-[Inter-Medium] text-gray-600">Show:</span>
-            <select
-              value={pageSize}
+          <select
+            value={pageSize}
               onChange={handlePageSizeChange}
               className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
-            >
-              {[5, 10, 20, 30, 40, 50].map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
+          >
+            {[5, 10, 20, 30, 40, 50].map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
           </div>
          
           <button 
@@ -518,7 +518,7 @@ const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, revi
         <div className="text-sm text-gray-600 font-[Inter-Regular]">
           Showing {pagination.pageIndex * pageSize + 1} to{' '}
           {Math.min((pagination.pageIndex + 1) * pageSize, table.getFilteredRowModel().rows.length)}{' '}
-          of {table.getFilteredRowModel().rows.length} entries
+            of {table.getFilteredRowModel().rows.length} entries
         </div>
 
         <div className="flex items-center gap-2">
