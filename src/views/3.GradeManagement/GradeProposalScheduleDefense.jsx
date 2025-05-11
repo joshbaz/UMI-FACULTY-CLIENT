@@ -51,14 +51,7 @@ const GradeProposalScheduleDefense = () => {
   const [selectedReviewers, setSelectedReviewers] = useState([]);
 
   // New panelist/reviewer form
-  const [newPanelistName, setNewPanelistName] = useState("");
-  const [newPanelistEmail, setNewPanelistEmail] = useState("");
-  const [newReviewerName, setNewReviewerName] = useState("");
-  const [newReviewerEmail, setNewReviewerEmail] = useState("");
-  const [newChairpersonName, setNewChairpersonName] = useState("");
-  const [newChairpersonEmail, setNewChairpersonEmail] = useState("");
-  const [newMinutesSecretaryName, setNewMinutesSecretaryName] = useState("");
-  const [newMinutesSecretaryEmail, setNewMinutesSecretaryEmail] = useState("");
+
 
   // Form validation
   const [formErrors, setFormErrors] = useState({});
@@ -73,17 +66,6 @@ const GradeProposalScheduleDefense = () => {
   // Fetch external persons
   const { data: externalPersonsData, isLoading: externalPersonsLoading } = 
     useGetExternalPersons();
-
-  // Create external person mutation
-  const createExternalPersonMutation = useMutation({
-    mutationFn: ({ name, email, role }) => createExternalPersonService(name, email, role),
-    onSuccess: (data) => {
-      setSuccess("New minutes secretary added successfully");
-    },
-    onError: (error) => {
-      setError(error.message || "Failed to create minutes secretary");
-    }
-  });
 
   // Fetch available panelists
   const { data: panelistsData, isLoading: panelistsLoading } = useGetPanelists()
