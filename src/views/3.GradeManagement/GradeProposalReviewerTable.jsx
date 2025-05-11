@@ -9,31 +9,11 @@ import {
 } from '@tanstack/react-table'
 import { UserPlus } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { deleteReviewerService, addReviewersService } from '../../store/tanstackStore/services/api'
+import { deleteReviewerService } from '../../store/tanstackStore/services/api'
 import { toast } from 'sonner'
-import { Icon } from "@iconify-icon/react"
-import { useGetReviewers } from "../../store/tanstackStore/services/queries"
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { debounce } from 'lodash';
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
-const SearchInput = memo(({ value, onChange, placeholder }) => (
-  <Input
-    type="text"
-    placeholder={placeholder}
-    value={value}
-    onChange={onChange}
-  />
-))
+
 {/** Delete Modal */}
 const DeleteModal = ({ isOpen, onClose, onConfirm, reviewer, isPending }) => {
   if (!isOpen) return null;
@@ -117,36 +97,8 @@ const PaginationButtons = memo(({ table, currentPage, totalPages }) => {
     </div>
   );
 });
-{/** Reviewers List */}
-const ReviewersList = memo(({ reviewers, selectedReviewers, onSelect }) => (
-  <div className="border rounded-md shadow-sm">
-    {reviewers.map(reviewer => (
-      <ReviewerItem 
-        key={reviewer.id}
-        reviewer={reviewer}
-        isSelected={selectedReviewers.some(r => r.id === reviewer.id)}
-        onSelect={() => onSelect(reviewer)}
-      />
-    ))}
-  </div>
-));
-{/** Reviewer Item */}
-const ReviewerItem = memo(({ reviewer, isSelected, onSelect }) => (
-  <div
-    className={`p-3 flex justify-between items-center hover:bg-gray-50 cursor-pointer ${
-      isSelected ? 'bg-primary-50 border-l-4 border-primary-500' : ''
-    }`}
-    onClick={onSelect}
-  >
-    <div>
-      <div className="font-medium text-gray-800">{reviewer.name}</div>
-      <div className="text-sm text-gray-500">{reviewer.email}</div>
-    </div>
-    {isSelected && (
-      <Icon icon="mdi:check" className="w-5 h-5 text-primary-600" />
-    )}
-  </div>
-));
+
+
 
 {/** Main- Grade Proposal Reviewer Table */}
 const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, reviewGrades, onViewClick, isProposalActive }) => {
@@ -156,98 +108,13 @@ const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, revi
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [selectedReviewer, setSelectedReviewer] = useState(null)
   const [tableData, setTableData] = useState(reviewers)
-  const [isReviewerModalOpen, setIsReviewerModalOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [manualReviewer, setManualReviewer] = useState({ name: "", email: "" })
-  const [selectedReviewers, setSelectedReviewers] = useState([])
   let navigate = useNavigate()
     // const { id: proposalId } = useParams();
-
-  const { data: reviewersData, isLoading: isLoadingReviewers } = useGetReviewers()
   let queryClient = useQueryClient()
 
   useEffect(() => {
     setTableData(reviewers)
   }, [reviewers])
-
-  const debouncedSearchHandler = useMemo(
-    () => debounce((value) => {
-      setSearchTerm(value)
-    }, 300),
-    []
-  )
-
-  const handleSearchTermChange = useCallback((e) => {
-    debouncedSearchHandler(e.target.value)
-  }, [debouncedSearchHandler])
-
-  const handleManualReviewerChange = useCallback((field) => (e) => {
-    setManualReviewer(prev => ({...prev, [field]: e.target.value}))
-  }, [])
-
-  const handleAddManualReviewer = useCallback(() => {
-    if (manualReviewer.name && manualReviewer.email) {
-      const newReviewer = {
-        id: `manual-${Date.now()}`,
-        name: manualReviewer.name,
-        email: manualReviewer.email
-      }
-      setSelectedReviewers(prev => [...prev, newReviewer])
-      setManualReviewer({ name: "", email: "" })
-    }
-  }, [manualReviewer])
-
-  const handleReviewerSelection = useCallback((reviewer) => {
-    setSelectedReviewers(prev => {
-      const exists = prev.some(r => r.id === reviewer.id)
-      return exists 
-        ? prev.filter(r => r.id !== reviewer.id)
-        : [...prev, reviewer]
-    })
-  }, [])
-
-  const handleRemoveReviewer = useCallback((reviewerId) => {
-    setSelectedReviewers(prev => prev.filter(r => r.id !== reviewerId))
-  }, [])
-
-  const resetReviewerModal = useCallback(() => {
-    setIsReviewerModalOpen(false)
-    setSelectedReviewers([])
-    setManualReviewer({ name: "", email: "" })
-    setSearchTerm("")
-  }, [])
-
-  const addReviewersMutation = useMutation({
-    mutationFn: (reviewers) => addReviewersService(proposalId, reviewers),
-    onSuccess: () => {
-      toast.success("Reviewers added successfully")
-     
-    },
-    onSettled: async (data, error) => {
-      if (!error) {
-         Promise.all([
-           await queryClient.resetQueries({ queryKey: ['proposal', proposalId] }),
-           resetReviewerModal()
-        ])
-      }
-    }
-  })
-
-  const handleAddReviewers = useCallback(() => {
-    if (selectedReviewers.length > 0) {
-      addReviewersMutation.mutate(selectedReviewers)
-    }
-  }, [selectedReviewers, addReviewersMutation])
-
-  const filteredReviewers = useMemo(() => {
-    if (!searchTerm || !reviewersData?.reviewers) return []
-    return reviewersData.reviewers
-      .filter(reviewer => 
-        reviewer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        reviewer.email.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .slice(0, 5)
-  }, [searchTerm, reviewersData])
 
   const deleteReviewerMutation = useMutation({
     mutationFn: ({ proposalId, reviewerId }) => deleteReviewerService(proposalId, reviewerId),
@@ -555,99 +422,7 @@ const GradeProposalReviewerTable = ({ reviewers, proposalId, onUpdateClick, revi
       />
 
       {/* Reviewer Modal */}
-      <Dialog open={isReviewerModalOpen} onOpenChange={setIsReviewerModalOpen}>
-        <DialogContent className="max-w-[80vh] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add Reviewer</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <SearchInput 
-              value={searchTerm}
-              onChange={handleSearchTermChange}
-              placeholder="Search reviewer..."
-            />
-
-            {/* Use filtered data */}
-            {searchTerm && (
-              isLoadingReviewers ? (
-                <div className="text-center py-4 text-gray-600">Loading reviewers...</div>
-              ) : reviewersData && reviewersData?.reviewers?.length > 0 ? (
-                <ReviewersList 
-                  reviewers={filteredReviewers}
-                  selectedReviewers={selectedReviewers}
-                  onSelect={handleReviewerSelection}
-                />
-              ) : (
-                <div className="text-center py-4 text-gray-500 bg-gray-50 rounded-md">No reviewers found</div>
-              )
-            )}
-
-            {/* Manual reviewer entry */}
-            <div className="border-t pt-4">
-              <Label className="text-sm font-[Inter-Regular] mb-2">Add reviewer manually</Label>
-              <div className="space-y-3">
-                <Input
-                  type="text"
-                  placeholder="Name"
-                  value={manualReviewer.name}
-                  onChange={handleManualReviewerChange('name')}
-                />
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  value={manualReviewer.email}
-                  onChange={handleManualReviewerChange('email')}
-                />
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleAddManualReviewer}
-                  disabled={!manualReviewer.name || !manualReviewer.email}
-                >
-                  Add to Selected
-                </Button>
-              </div>
-            </div>
-
-            {/* Selected reviewers */}
-            {selectedReviewers.length > 0 && (
-              <div>
-                <Label className="text-sm font-[Inter-Regular] mb-2">Selected reviewers</Label>
-                <div className="space-y-2">
-                  {selectedReviewers.map(reviewer => (
-                    <div key={reviewer.id} className="flex justify-between items-center p-2.5 bg-gray-100 rounded-md capitalize">
-                      <span className="font-medium text-gray-800">{reviewer.name}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveReviewer(reviewer.id)}
-                      >
-                        <Icon icon="mdi:close" height={20} width={20} />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={resetReviewerModal}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAddReviewers}
-              disabled={addReviewersMutation.isPending || selectedReviewers.length === 0}
-            >
-              {addReviewersMutation.isPending ? "Adding..." : "Add"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+    
     </div>
   )
 }
