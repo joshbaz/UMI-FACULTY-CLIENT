@@ -12,11 +12,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Pencil, Percent } from "lucide-react";
-import { format } from "date-fns";
+import { X, Pencil } from "lucide-react";
 import { useGetFacultyProfile } from "../../store/tanstackStore/services/queries";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Formik, Form, Field } from "formik";
