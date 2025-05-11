@@ -2,15 +2,11 @@ import { format } from "date-fns";
 import { ArrowLeft, Search, Loader2 } from "lucide-react";
 import React, { useMemo, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Icon } from "@iconify-icon/react";
 import { useGetProposal } from "../../store/tanstackStore/services/queries";
 import GradeProposalTableTabs from "./GradeProposalTableTabs";
 import GradeProposalReviewerTable from "./GradeProposalReviewerTable";
-import GradeProposalPanelistTable from "./GradeProposalPanelistTable";
 import GradeProposalUpdateReviewerMark from "./GradeProposalUpdateReviewerMark";
-import GradeProposalUpdatePanelistMark from "./GradeProposalUpdatePanelistMark";
 import GradeProposalViewReviewerMark from "./GradeProposalViewReviewerMark";
-import GradeProposalViewPanelistMark from "./GradeProposalViewPanelistMark";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/ui/dialog";
 import { useMutation } from "@tanstack/react-query";
 import { addComplianceReportDateService, updateFieldLetterDateService } from "../../store/tanstackStore/services/api";
@@ -23,11 +19,8 @@ const GradeProposal = () => {
   let navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Reviewers");
   const [isUpdateReviewerDrawerOpen, setIsUpdateReviewerDrawerOpen] = useState(false);
-  const [isUpdatePanelistDrawerOpen, setIsUpdatePanelistDrawerOpen] = useState(false);
   const [isViewReviewerDrawerOpen, setIsViewReviewerDrawerOpen] = useState(false);
-  const [isViewPanelistDrawerOpen, setIsViewPanelistDrawerOpen] = useState(false);
   const [selectedReviewer, setSelectedReviewer] = useState(null);
-  const [selectedPanelist, setSelectedPanelist] = useState(null);
   const [isComplianceReportDialogOpen, setIsComplianceReportDialogOpen] = useState(false);
   const [isFieldLetterDateDialogOpen, setIsFieldLetterDateDialogOpen] = useState(false);
   const [complianceReportDate, setComplianceReportDate] = useState("");
@@ -120,24 +113,14 @@ const GradeProposal = () => {
     setIsUpdateReviewerDrawerOpen(true);
   }, [isProposalActive]);
 
-  const handlePanelistUpdateClick = useCallback((panelist) => {
-    if (!isProposalActive) {
-      toast.error("Cannot update panelists for inactive proposals");
-      return;
-    }
-    setSelectedPanelist(panelist);
-    setIsUpdatePanelistDrawerOpen(true);
-  }, [isProposalActive]);
+ 
 
   const handleViewReviewerClick = useCallback((reviewer) => {
     setSelectedReviewer(reviewer);
     setIsViewReviewerDrawerOpen(true);
   }, []);
 
-  const handleViewPanelistClick = useCallback((panelist) => {
-    setSelectedPanelist(panelist);
-    setIsViewPanelistDrawerOpen(true);
-  }, []);
+
 
   const hasPassedProposalGraded = useMemo(() => {
     return proposal?.proposal?.statuses?.some(
@@ -335,16 +318,7 @@ const GradeProposal = () => {
             />
           )}
           
-          {/* {activeTab !== "Reviewers" && activeTab !== "Proposal defense" && (
-            <GradeProposalPanelistTable 
-              panelists={proposal?.proposal?.panelists || []} 
-              proposalId={proposalId} 
-              onUpdateClick={handlePanelistUpdateClick} 
-              defenseGrades={proposal?.proposal?.defenseGrades} 
-              onViewClick={handleViewPanelistClick} 
-              isProposalActive={isProposalActive}
-            />
-          )} */}
+          
         </div>
       </div>
 
@@ -354,11 +328,6 @@ const GradeProposal = () => {
       {/** View Reviewer Mark */}
       <GradeProposalViewReviewerMark isOpen={isViewReviewerDrawerOpen} onClose={() => setIsViewReviewerDrawerOpen(false)} reviewer={selectedReviewer} proposalId={proposalId} proposal={proposal?.proposal} isProposalActive={isProposalActive} />
 
-      {/** Update Panelist Mark */}
-      {/* <GradeProposalUpdatePanelistMark isOpen={isUpdatePanelistDrawerOpen} onClose={() => setIsUpdatePanelistDrawerOpen(false)} panelist={selectedPanelist} proposalId={proposalId} proposal={proposal} /> */}
-
-      {/** View Panelist Mark */}
-      {/* <GradeProposalViewPanelistMark isOpen={isViewPanelistDrawerOpen} onClose={() => setIsViewPanelistDrawerOpen(false)} panelist={selectedPanelist} proposalId={proposalId} proposal={proposal?.proposal} /> */}
 
       {/** Compliance Report Date Dialog */}
       <Dialog open={isComplianceReportDialogOpen} onOpenChange={setIsComplianceReportDialogOpen}>
