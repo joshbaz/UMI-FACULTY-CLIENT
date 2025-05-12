@@ -15,6 +15,13 @@ import { queryClient } from "../../utils/tanstack";
 import GradeProposalGenerateFieldLetter from "./GradeProposalGenerateFieldLetter";
 import GradeProposalDefenseTable from "./GradeProposalDefenseTable";
 
+/**
+ * The GradeProposal component is responsible for displaying and managing the details of a proposal,
+ * including its reviewers, compliance report, field letter dates, and other related information.
+ * It provides functionality to update or view reviewer marks, manage compliance report dates,
+ * and handle field letter generation. The component also displays the current status and timeline
+ * of the proposal.
+ */
 const GradeProposal = () => {
   let navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Reviewers");
@@ -23,8 +30,10 @@ const GradeProposal = () => {
   const [selectedReviewer, setSelectedReviewer] = useState(null);
   const [isComplianceReportDialogOpen, setIsComplianceReportDialogOpen] = useState(false);
   const [isFieldLetterDateDialogOpen, setIsFieldLetterDateDialogOpen] = useState(false);
+  const [isEthicsCommitteeDialogOpen, setIsEthicsCommitteeDialogOpen] = useState(false);
   const [complianceReportDate, setComplianceReportDate] = useState("");
   const [fieldLetterDate, setFieldLetterDate] = useState("");
+  const [ethicsCommitteeDate, setEthicsCommitteeDate] = useState("");
   const [isFieldLetterDialogOpen, setIsFieldLetterDialogOpen] = useState(false);
   const { id: proposalId } = useParams();
   const { data: proposal, isPending: isLoading, error, refetch:refetchProposal } = useGetProposal(proposalId);
@@ -52,6 +61,19 @@ const GradeProposal = () => {
     },
     onError: (error) => {
       toast.error(error.message || "Failed to update field letter date");
+    }
+  });
+
+  const updateEthicsCommitteeDateMutation = useMutation({
+    mutationFn: ({ proposalId, ethicsCommitteeDate }) => updateEthicsCommitteeDateService(proposalId, ethicsCommitteeDate),
+    onSuccess: () => {
+      toast.success("Ethics committee date updated successfully");
+      queryClient.resetQueries({ queryKey: ["proposal", proposalId] });
+      setIsEthicsCommitteeDialogOpen(false);
+      setEthicsCommitteeDate("");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update ethics committee date");
     }
   });
 
@@ -259,11 +281,11 @@ const GradeProposal = () => {
             </h3>
             <div className="flex items-center gap-4">
               <span className="text-sm font-[Inter-Regular] text-gray-900">
-                {proposal?.proposal?.letterToField 
+                {proposal?.proposal?.letterToField
                   ? "Available"
                   : "Not Available"}
               </span>
-              <button 
+              <button
                 className={`px-2 py-1 text-xs font-[Inter-Medium] text-white rounded ${isProposalActive ? 'bg-accent2-600 hover:bg-accent2-700' : 'bg-gray-400 cursor-not-allowed'}`}
                 onClick={() => isProposalActive ? setIsFieldLetterDialogOpen(true) : toast.error("Cannot generate field letter for inactive proposals")}
                 disabled={!isProposalActive}
@@ -272,6 +294,26 @@ const GradeProposal = () => {
               </button>
             </div>
           </div> */}
+          
+          <div>
+            <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
+               Letter to Ethics Committee 
+            </h3>
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-[Inter-Regular] text-gray-900">
+                {proposal?.proposal?.ethicsCommitteeDate 
+                  ? format(new Date(proposal.proposal.ethicsCommitteeDate), "dd-MMM-yyyy")
+                  : "Not Available"}
+              </span>
+              <button 
+                className={`px-2 py-1 text-xs font-[Inter-Medium] text-white rounded ${isProposalActive ? 'bg-accent2-600 hover:bg-accent2-700' : 'bg-gray-400 cursor-not-allowed'}`}
+                onClick={() => isProposalActive ? setIsEthicsCommitteeDialogOpen(true) : toast.error("Cannot update field letter date for inactive proposals")}
+                disabled={!isProposalActive}
+              >
+                {proposal?.proposal?.ethicsCommitteeDate ? "Update" : "Add Date"}
+              </button>
+            </div>
+          </div>
 
           <div>
             <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
@@ -409,8 +451,60 @@ const GradeProposal = () => {
         </DialogContent>
       </Dialog>
 
+      {/** Ethics Committee Date Dialog */}
+      <Dialog open={isEthicsCommitteeDialogOpen} onOpenChange={setIsEthicsCommitteeDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold leading-6">
+              {proposal?.proposal?.ethicsCommitteeDate ? "Update Ethics Committee Date" : "Add Ethics Committee Date"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            if (!ethicsCommitteeDate) {
+              toast.error("Please select a date");
+              return;
+            }
+            updateEthicsCommitteeDateMutation.mutate({
+              proposalId,
+              ethicsCommitteeDate
+            });
+          }} className="grid gap-6 py-4">
+            <div className="grid gap-2">
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Ethics Committee Date
+              </label>
+              <input
+                type="date"
+                value={ethicsCommitteeDate}
+                onChange={(e) => setEthicsCommitteeDate(e.target.value)}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+            <DialogFooter>
+              <button
+                type="button"
+                onClick={() => setIsEthicsCommitteeDialogOpen(false)}
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={updateEthicsCommitteeDateMutation.isPending}
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+              >
+                {updateEthicsCommitteeDateMutation.isPending ? "Saving..." : "Save"}
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/** Field Letter Dialog */}
-      <GradeProposalGenerateFieldLetter isOpen={isFieldLetterDialogOpen} onClose={() => setIsFieldLetterDialogOpen(false)} proposalId={proposalId} proposal={proposal?.proposal} />
+      {isFieldLetterDialogOpen && (
+        <GradeProposalGenerateFieldLetter isOpen={isFieldLetterDialogOpen} onClose={() => setIsFieldLetterDialogOpen(false)} proposalId={proposalId} proposal={proposal?.proposal} />
+      )}
     </div>  
   );
 };
