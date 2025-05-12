@@ -303,6 +303,15 @@ export const updateFieldLetterDateService = async (proposalId: string, fieldLett
         errorHandling(error)
     }
 }
+
+export const updateEthicsCommitteeDateService = async (proposalId: string, ethicsCommitteeDate: string) => {
+    try {
+        const response = await apiRequest.put(`/faculty/update-ethics-committee-date/${proposalId}`, { ethicsCommitteeDate })
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}
 /* ********** END OF FIELD LETTER MANAGEMENT ********** */
 
 /* ********** EXAMINER MANAGEMENT ********** */
