@@ -220,7 +220,7 @@ const GradeProposalReportsTable = ({
                     </button>
                     <button
                         onClick={() => handlePreviewReport(row.original.id, row.original.fileName)}
-                        className="inline-flex items-center px-3 py-1.5 bg-secondary-600 text-white text-xs rounded hover:bg-secondary-700"
+                        className="inline-flex items-center px-3 py-1.5 bg-secondary-600/60 text-black text-xs rounded hover:bg-secondary-700"
                     >
                         <Eye className="w-3 h-3 mr-1" />
                         Preview
@@ -252,7 +252,7 @@ const GradeProposalReportsTable = ({
                     className="inline-flex items-center text-sm font-[Inter-SemiBold] px-4 py-2 bg-primary-600 text-white rounded-[6px] gap-2 hover:bg-primary-700"
                     onClick={onGenerateReportClick}
                 >
-                    <Download className="w-4 h-4" />
+                    {/* <Download className="w-4 h-4" /> */}
                     Generate Defense Report
                 </button>
             </div>

@@ -228,7 +228,7 @@ const GradeProposalDefenseReport = ({ isOpen, onClose, proposal }) => {
               <div className="text-center mb-6 border-b pb-4">
                 <div className="flex justify-center items-center mb-4">
                   <div className="border-r border-gray-300 pr-4">
-                    <h1 className="text-xl font-bold">MAKERERE</h1>
+                    <h1 className="text-xl font-bold">Uganda Management </h1>
                     <p className="text-xs">P.O. Box 7062</p>
                     <p className="text-xs">Kampala, Uganda</p>
                     <p className="text-xs">Cable: 255465</p>
@@ -241,7 +241,7 @@ const GradeProposalDefenseReport = ({ isOpen, onClose, proposal }) => {
                     />
                   </div>
                   <div className="border-l border-gray-300 pl-4">
-                    <h1 className="text-xl font-bold">UNIVERSITY</h1>
+                    <h1 className="text-xl font-bold">Institute</h1>
                     <p className="text-xs">Tel: 256-414-31939</p>
                     <p className="text-xs">E-mail: principal@chuss.mak.ac.ug</p>
                     <p className="text-xs">Website: www.chuss.mak.ac.ug</p>
@@ -362,7 +362,7 @@ const GradeProposalDefenseReport = ({ isOpen, onClose, proposal }) => {
                 <p className="text-sm text-blue-700">
                   You are about to download an official Proposal Defense Report
                   for {reportData.studentName} ({reportData.regNo}). This
-                  document uses the official Makerere University letterhead
+                  document uses the official Uganda Management Institute letterhead
                   template.
                 </p>
               </div>
