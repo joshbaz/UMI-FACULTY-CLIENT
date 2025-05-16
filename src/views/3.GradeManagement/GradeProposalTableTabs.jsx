@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 const GradeProposalTableTabs = ({ activeTab, setActiveTab }) => {
   const categories = useMemo(
-    () => ["Reviewers", "Proposal defense"].filter(Boolean),
+    () => ["Reviewers", "Proposal defense", "Reports"].filter(Boolean),
     []
   );
   const handleCategoryClick = useCallback(

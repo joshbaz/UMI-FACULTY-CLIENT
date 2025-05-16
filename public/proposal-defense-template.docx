@@ -1,0 +1,44 @@
+﻿
+
+
+
+
+
+
+
+PROPOSAL DEFENSE REPORT
+
+${currentDate}
+
+
+TO: ${studentName}
+FROM: ${supervisorName}
+Graduate Studies Committee
+
+Dear ${studentName},
+
+RE: Research Proposal Defense Result
+This letter confirms that your research proposal titled "Ethics in Business Strategy" has been defended and the verdict is ${verdict}.
+
+Student Information:
+Registration Number: ${regNo}
+Supervisors: ${supervisors}
+
+Key Points:
+
+1. Research Timeline
+   • Commence your research activities as per your proposed schedule
+   • Any timeline modifications require supervisor approval
+
+
+
+Please contact your supervisor or the department office if you need any clarification.
+
+Best regards,
+
+${supervisorName}
+Supervisor
+${department}
+${university}
+
+cc: Student File

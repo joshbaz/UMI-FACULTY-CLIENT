@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals, getAllExaminersService, getExaminerService, getBookService, getStudentBooksService, getAllBooksService, getProgressTrendsService, getStatusStatisticsService, getDashboardStatsService, getNotificationsService, getProposalDefensesService, getAllSupervisorsService, getChairpersonsService, getExternalPersonsService, getExternalPersonsByRoleService, } from './api.js';
+import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals, getAllExaminersService, getExaminerService, getBookService, getStudentBooksService, getAllBooksService, getProgressTrendsService, getStatusStatisticsService, getDashboardStatsService, getNotificationsService, getProposalDefensesService, getAllSupervisorsService, getChairpersonsService, getExternalPersonsService, getExternalPersonsByRoleService, getProposalDefenseReportsService, } from './api.js';
 
 // Common options for most queries
 function getDefaultQueryOptions() {
@@ -246,6 +246,27 @@ export const useGetProposalDefenses = () => {
     queryFn: getProposalDefensesService,
     staleTime: Infinity, // 1 minute
     refetchInterval: false,
+  });
+};
+
+export const useGetProposalDefenseReports = (proposalId: string) => {
+  return useQuery({
+    queryKey: ['proposalDefenseReports', proposalId],
+    queryFn: () => getProposalDefenseReportsService(proposalId),
+    staleTime: 300000, // 5 minutes
+    refetchInterval: false,
+    retry: 1,
+  });
+}; 
+
+export const downloadProposalDefenseReport = (reportId: string) => {
+  return useQuery({
+    queryKey: ['downloadProposalDefenseReport', reportId],
+    queryFn: () => getProposalDefenseReportsService(reportId),
+    enabled: Boolean(reportId), // Only run if reportId exists
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false, 
+    retry: 1,
   });
 };
 /* ********** END OF PROPOSAL DEFENSE MANAGEMENT ********** */

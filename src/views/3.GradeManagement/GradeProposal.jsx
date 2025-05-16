@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { ArrowLeft, Search, Loader2 } from "lucide-react";
+import { ArrowLeft, Search, Loader2, Download } from "lucide-react";
 import React, { useMemo, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetProposal } from "../../store/tanstackStore/services/queries";
@@ -9,11 +9,13 @@ import GradeProposalUpdateReviewerMark from "./GradeProposalUpdateReviewerMark";
 import GradeProposalViewReviewerMark from "./GradeProposalViewReviewerMark";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/ui/dialog";
 import { useMutation } from "@tanstack/react-query";
-import { addComplianceReportDateService, updateFieldLetterDateService } from "../../store/tanstackStore/services/api";
+import { addComplianceReportDateService, updateEthicsCommitteeDateService, updateFieldLetterDateService } from "../../store/tanstackStore/services/api";
 import { toast } from "sonner";
 import { queryClient } from "../../utils/tanstack";
 import GradeProposalGenerateFieldLetter from "./GradeProposalGenerateFieldLetter";
 import GradeProposalDefenseTable from "./GradeProposalDefenseTable";
+import GradeProposalDefenseReport from "./GradeProposalDefenseReport";
+import GradeProposalReportsTable from "./GradeProposalReportsTable";
 
 /**
  * The GradeProposal component is responsible for displaying and managing the details of a proposal,
@@ -31,6 +33,7 @@ const GradeProposal = () => {
   const [isComplianceReportDialogOpen, setIsComplianceReportDialogOpen] = useState(false);
   const [isFieldLetterDateDialogOpen, setIsFieldLetterDateDialogOpen] = useState(false);
   const [isEthicsCommitteeDialogOpen, setIsEthicsCommitteeDialogOpen] = useState(false);
+  const [isDefenseReportDialogOpen, setIsDefenseReportDialogOpen] = useState(false);
   const [complianceReportDate, setComplianceReportDate] = useState("");
   const [fieldLetterDate, setFieldLetterDate] = useState("");
   const [ethicsCommitteeDate, setEthicsCommitteeDate] = useState("");
@@ -142,13 +145,13 @@ const GradeProposal = () => {
     setIsViewReviewerDrawerOpen(true);
   }, []);
 
-
-
   const hasPassedProposalGraded = useMemo(() => {
     return proposal?.proposal?.statuses?.some(
       status => status.definition.name === "passed-proposal graded"
     );
   }, [proposal?.proposal?.statuses]);
+
+  console.log("Proposal Data: ", proposal?.proposal?.defenseReports);
 
   if (isLoading) {
     return (
@@ -337,6 +340,7 @@ const GradeProposal = () => {
         </div>
       )}
 
+{/** table section */}
       <div className="bg-white py-4 rounded-lg shadow-md mx-6 mb-8">
         <GradeProposalTableTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         
@@ -354,13 +358,18 @@ const GradeProposal = () => {
           )}
           
           {activeTab === "Proposal defense" && (
-            <GradeProposalDefenseTable 
-              proposalId={proposalId}
-              isProposalActive={isProposalActive}
-            />
+              <GradeProposalDefenseTable
+                proposalId={proposalId}
+                isProposalActive={isProposalActive}
+              />
           )}
-          
-          
+{activeTab === "Reports" && (
+  <GradeProposalReportsTable
+    reports={proposal?.proposal?.defenseReports || []}
+    isLoading={isLoading}
+    onGenerateReportClick={() => setIsDefenseReportDialogOpen(true)}
+  />
+)}
         </div>
       </div>
 
@@ -505,7 +514,14 @@ const GradeProposal = () => {
       {isFieldLetterDialogOpen && (
         <GradeProposalGenerateFieldLetter isOpen={isFieldLetterDialogOpen} onClose={() => setIsFieldLetterDialogOpen(false)} proposalId={proposalId} proposal={proposal?.proposal} />
       )}
-    </div>  
+
+      {/** Defense Report Dialog */}
+      <GradeProposalDefenseReport
+        isOpen={isDefenseReportDialogOpen}
+        onClose={() => setIsDefenseReportDialogOpen(false)}
+        proposal={proposal?.proposal}
+      />
+    </div>
   );
 };
 

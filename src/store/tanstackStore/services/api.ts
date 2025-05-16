@@ -111,8 +111,6 @@ export const submitProposalService = async (studentId: string, proposal: any) =>
     }
 }
 
-
-
 export const gradeProposal = async (studentId: string, proposalId: string, grade: number, feedback: string) => {
     try {
         const response = await apiRequest.post(`/faculty/proposals/${studentId}/${proposalId}/grade`, { grade, feedback })
@@ -167,13 +165,53 @@ export const addComplianceReportDateService = async (proposalId: string, complia
     }
 }
 
+export const generateDefenseReportService = async (proposalId: string, reportData: FormData) => {
+  try {
+    const response = await apiRequest.post(`/faculty/generate-defense-report/${proposalId}`, reportData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    errorHandling(error);
+  }
+}
+
+export const getProposalDefenseReportsService = async (proposalId: string) => {
+    try {
+    const response = await apiRequest.get(`/faculty/proposal/${proposalId}/defense-reports`);
+    return response.data;
+    } catch (error) {
+    errorHandling(error);
+    }
+}
+
+
+
+export const downloadProposalDefenseReportService = async (reportId) => {
+    try {
+      const response = await apiRequest.get(
+        `/faculty/defense-reports/${reportId}/download`,
+        {
+          responseType: 'blob', // Important: This tells axios to expect binary data
+          headers: {
+            'Accept': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          }
+        }
+      );
+      return response;
+    } catch (error) {
+      console.error('Error downloading report:', error);
+      throw error;
+    }
+  }; 
 
 
 
 /* ********** END OF PROPOSAL MANAGEMENT ********** */
 
 /* ********** REVIEWER MANAGEMENT ********** */
-
 export const createReviewerService = async (data: any) => {
     try {
         const response = await apiRequest.post(`/faculty/reviewer`, data)
@@ -604,5 +642,3 @@ export const deleteExternalPersonService = async (id: string) => {
 }
 
 /* ********** END OF EXTERNAL PERSONS MANAGEMENT ********** */
-
-
