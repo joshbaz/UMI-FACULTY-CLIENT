@@ -363,6 +363,7 @@ const GradeProposal = () => {
                 isProposalActive={isProposalActive}
               />
           )}
+          
 {activeTab === "Reports" && (
   <GradeProposalReportsTable
     reports={proposal?.proposal?.defenseReports || []}
