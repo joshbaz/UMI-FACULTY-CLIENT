@@ -30,6 +30,11 @@ const Sidebar = () => {
       path: "/grades",
     },
     {
+      label: "Faculty Management", 
+      icon: "heroicons-solid:user-group",
+      path: "/faculty",
+    },
+    {
       label: "Notifications",
       icon: "material-symbols:deployed-code-sharp",
       path: "/notifications",

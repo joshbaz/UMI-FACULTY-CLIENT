@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 
+import { X } from "lucide-react";
 import {
   useGetStudentStatuses,
   useGetStudentProposals,
@@ -15,20 +16,31 @@ import StudentProfileProgressStatusTable from "./StudentProfileProgressStatusTab
 import StudentProfileProgressProposalTable from "./StudentProfileProgressProposalTable.jsx";
 import StudentProfileProgressStatusDrawer from "./StudentProfileProgressStatusDrawer.jsx";
 import StudentProfileProgressProposalDrawer from "./StudentProfileProgressProposalDrawer.jsx";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGetStudentBooks } from "../../store/tanstackStore/services/queries.js";
 import StudentProfileProgressBookTable from "./StudentProfileProgressBookTable.jsx";
 import StudentProfileProgressBookDrawer from "./StudentProfileProgressBookDrawer.jsx";
+
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+
 
 const StudentProfileProgressPage = ({ studentData }) => {
   const [activeView, setActiveView] = useState("tracker");
   const [isStatusDrawerOpen, setIsStatusDrawerOpen] = useState(false);
   const [isProposalDrawerOpen, setIsProposalDrawerOpen] = useState(false);
   const [isBookDrawerOpen, setIsBookDrawerOpen] = useState(false);
+  const [isSupervisorDrawerOpen, setIsSupervisorDrawerOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [selectedProposal, setSelectedProposal] = useState(null);
   const [selectedBook, setSelectedBook] = useState(null);
+  const [selectedSupervisor, setSelectedSupervisor] = useState(null);
   const { id } = useParams();
+  let navigate = useNavigate();
 
   const [resultsApprovedDate, setResultsApprovedDate] = useState(
     studentData?.student?.resultsApprovedDate || ""
@@ -55,7 +67,7 @@ const StudentProfileProgressPage = ({ studentData }) => {
   );
 
   const currentSupervisor = useMemo(
-    () => studentData?.student?.supervisors?.[0],
+    () => studentData?.student?.supervisors,
     [studentData?.student?.supervisors]
   );
 
@@ -181,6 +193,81 @@ const StudentProfileProgressPage = ({ studentData }) => {
     [studentData?.student?.statuses]
   );
 
+  const handleViewSupervisor = (supervisor) => {
+    setSelectedSupervisor(supervisor);
+    setIsSupervisorDrawerOpen(true);
+  };
+
+  const handleChangeSupervisor = (supervisor) => {
+    navigate(`/students/change-supervisor/${id}?supervisorId=${supervisor.id}`);
+  };
+
+    // TanStack Table for Supervisors
+    const columnHelper = createColumnHelper();
+
+    const supervisorColumns = [
+      columnHelper.accessor("name", {
+        header: "Name",
+        cell: (info) => (
+          <span className="text-sm font-[Inter-Regular] text-gray-900">
+            {info.row.original.title} {info.getValue()}
+          </span>
+        ),
+      }),
+      columnHelper.accessor("workEmail", {
+        header: "Email",
+        cell: (info) => (
+          <span className="text-sm font-[Inter-Regular] text-gray-900">
+            {info.getValue() || "N/A"}
+          </span>
+        ),
+      }),
+      columnHelper.accessor("primaryPhone", {
+        header: "Phone",
+        cell: (info) => (
+          <span className="text-sm font-[Inter-Regular] text-gray-900">
+            {info.getValue() || "N/A"}
+          </span>
+        ),
+      }),
+     
+      columnHelper.accessor("id", {
+        header: "Actions",
+        cell: (info) => {
+          const supervisor = info.row.original;
+          return (
+            <div className="flex flex-col gap-2 max-w-[150px] ">
+              <button
+                className="px-2 py-1 text-xs font-[Inter-Medium]  text-white bg-accent2-600 rounded hover:bg-accent2-700 flex items-center"
+                onClick={() => handleViewSupervisor(supervisor)}
+              >
+                <Icon icon="tabler:eye" className="h-3 w-3 mr-1" />
+                View Supervisor
+              </button>
+              {!supervisor.isCurrent && (
+                <button
+                  className="px-2 py-1 text-xs font-[Inter-Medium] text-white bg-primary-600 rounded hover:bg-primary-700 flex items-center"
+                  onClick={() => handleChangeSupervisor(supervisor)}
+                >
+                  <Icon icon="tabler:refresh" className="h-3 w-3 mr-1" />
+                  Change Supervisor
+                </button>
+              )}
+            </div>
+          );
+        },
+      }),
+    ];
+
+    const supervisorsData = studentData?.student?.supervisors || [];
+
+    const supervisorsTable = useReactTable({
+      data: supervisorsData,
+      columns: supervisorColumns,
+      getCoreRowModel: getCoreRowModel(),
+    });
+
+
   if (isLoadingStudentStatuses) {
     return <div>Loading...</div>;
   }
@@ -196,23 +283,19 @@ const StudentProfileProgressPage = ({ studentData }) => {
         {/** supervisor */}
         <div>
           <h3 className="text-sm font-[Inter-Regular] text-[#626263] mb-1">
-            Supervisor
+          Supervisor(s)
           </h3>
           <div className="flex gap-2">
-            <span className="text-sm font-[Inter-Regular] text-gray-900">
-              {" "}
-              {currentSupervisor
-                ? `${currentSupervisor.title} ${currentSupervisor.name} `
-                : "No supervisor assigned"}
-            </span>
-            <button className="text-[#626263]">
-              <Icon
-                icon="tabler:selector"
-                width="20"
-                height="20"
-                className=" text-[#626263]"
-              />
-            </button>
+          <div className="flex flex-col">
+              {currentSupervisor && currentSupervisor.length > 0 
+                ? currentSupervisor.map((supervisor) => (
+                    <span key={supervisor.id} className="text-sm font-[Inter-Regular] text-gray-900">
+                      {supervisor.title} {supervisor.name}
+                    </span>
+                  ))
+                : <span className="text-sm font-[Inter-Regular] text-gray-900">No supervisor assigned</span>}
+            </div>
+           
           </div>
         </div>
         {/** status */}
@@ -330,6 +413,71 @@ const StudentProfileProgressPage = ({ studentData }) => {
         </div>
       </div>
 
+         {/* Supervisor Table */}
+         <div className="bg-white rounded-lg shadow-sm p-4">
+        <div className="w-full flex items-center justify-between mb-4">
+          <h3 className="text-sm font-[Inter-Bold] text-gray-700 ">
+            Supervisors
+          </h3>
+
+          <div className="flex">
+            {studentData?.student?.supervisors && studentData.student.supervisors.length < 2 && (
+              <button 
+                onClick={() => navigate(`/students/add-supervisors/${id}`)} 
+                className="flex items-center gap-1 px-3 py-1.5 text-xs font-[Inter-Medium] text-white bg-primary-600 rounded hover:bg-primary-700"
+              >
+                <Icon icon="tabler:plus" width="16" height="16" />
+                Add Supervisor(s)
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="overflow-x-auto w-full">
+          {supervisorsData.length > 0 ? (
+            <table className="w-full border-collapse">
+              <thead>
+                {supervisorsTable.getHeaderGroups().map(headerGroup => (
+                  <tr key={headerGroup.id} className="bg-gray-50">
+                    {headerGroup.headers.map(header => (
+                      <th 
+                        key={header.id}
+                        className="text-left py-3 px-3 text-sm font-[Inter-Medium] text-gray-500 border-b"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {supervisorsTable.getRowModel().rows.map(row => (
+                  <tr key={row.id} className="border-b hover:bg-gray-50">
+                    {row.getVisibleCells().map(cell => (
+                      <td 
+                        key={cell.id}
+                        className="py-2 px-3 text-sm font-[Inter-Regular] text-gray-900"
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="py-4 px-3 text-sm text-center text-gray-500">
+              No supervisors assigned
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Section 3: Status Action Tracker and Proposal Table and Book Table */}
       <div className="bg-white rounded-lg py-2 space-y-4">
         {/* Options */}
@@ -429,6 +577,125 @@ const StudentProfileProgressPage = ({ studentData }) => {
           bookData={selectedBook}
           studentData={studentData?.student}
         />
+      )}
+
+        {/* Supervisor Drawer */}
+        {isSupervisorDrawerOpen && selectedSupervisor && (
+        <div className="fixed inset-0  z-50 overflow-hidden">
+          <div className="fixed inset-0 top-0 h-screen bg-black/30" onClick={() => setIsSupervisorDrawerOpen(false)} />
+          <div className="fixed inset-y-0 right-0 flex max-w-full">
+            <div className="w-screen max-w-md">
+              <div className="flex h-full flex-col bg-white shadow-xl">
+                {/* Header */}
+                <div className="px-6 py-4 border-b">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-[Inter-Bold] text-gray-900">Supervisor Details</h2>
+                    <button
+                       onClick={() => setIsSupervisorDrawerOpen(false)}
+                        className="bg-primary-500 text-white rounded-lg hover:bg-primary-800 flex items-center justify-center whitespace-nowrap text-sm"
+                        style={{ width: "148px", height: "36px", gap: "8px" }}
+                      >
+                       <X className="w-5 h-5" />
+                        <span className="flex-shrink-0 text-sm">Close Window</span>
+                      </button>
+                  
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-6">
+                  <div className="space-y-6">
+                    {/* Basic Information */}
+                    <div>
+                      <h3 className="text-sm font-[Inter-Bold] text-gray-700 mb-3">Basic Information</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-gray-500">Name</p>
+                          <p className="text-sm font-[Inter-Medium]">
+                            {selectedSupervisor.title} {selectedSupervisor.name}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Status</p>
+                          <p className="text-sm font-[Inter-Medium]">
+                            {selectedSupervisor.isCurrent ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                Current
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                Previous
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Contact Information */}
+                    <div>
+                      <h3 className="text-sm font-[Inter-Bold] text-gray-700 mb-3">Contact Information</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-xs text-gray-500">Email</p>
+                          <p className="text-sm font-[Inter-Medium]">{selectedSupervisor.workEmail || "N/A"}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Phone</p>
+                          <p className="text-sm font-[Inter-Medium]">{selectedSupervisor.primaryPhone || "N/A"}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Alternative Phone</p>
+                          <p className="text-sm font-[Inter-Medium]">{selectedSupervisor.alternativePhone || "N/A"}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Academic Information */}
+                    <div>
+                      <h3 className="text-sm font-[Inter-Bold] text-gray-700 mb-3">Academic Information</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-xs text-gray-500">Department</p>
+                          <p className="text-sm font-[Inter-Medium]">{selectedSupervisor.department || "N/A"}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Specialization</p>
+                          <p className="text-sm font-[Inter-Medium]">{selectedSupervisor.specialization || "N/A"}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Notes */}
+                    {selectedSupervisor.notes && (
+                      <div>
+                        <h3 className="text-sm font-[Inter-Bold] text-gray-700 mb-3">Notes</h3>
+                        <p className="text-sm font-[Inter-Regular] bg-gray-50 p-3 rounded-md">
+                          {selectedSupervisor.notes}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="border-t border-gray-200 px-6 py-4">
+                  <div className="flex justify-center space-x-3">
+                   
+                   
+                      <button
+                        onClick={() => navigate(`/faculty/supervisor/profile/${selectedSupervisor?.id}`)}
+                        className="px-4 py-2 text-sm font-[Inter-Medium] text-white bg-primary-600 rounded-md hover:bg-primary-700"
+                      >
+                        View More
+                      </button>
+                  
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

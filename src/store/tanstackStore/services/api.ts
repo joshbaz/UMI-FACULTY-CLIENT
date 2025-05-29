@@ -642,3 +642,104 @@ export const deleteExternalPersonService = async (id: string) => {
 }
 
 /* ********** END OF EXTERNAL PERSONS MANAGEMENT ********** */
+
+/** ********** FACULTY MANAGEMENT ********** */
+export const getAllFacultyService = async () => {
+    try {
+        const response = await apiRequest.get('/faculty/faculty');
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const getAllCampusesService = async () => {
+    try {
+        const response = await apiRequest.get("/faculty/campuses");
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const getAllDepartmentsService = async (schoolId: string) => {
+    try {
+        const response = await apiRequest.get(`/faculty/schools/${schoolId}/departments`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const getAllSchoolsService = async () => {
+    try {
+        const response = await apiRequest.get("/faculty/schools");
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+/* ********** SUPERVISOR ********** */
+export const createSupervisorService = async (data: any) => {
+    try {
+        const response = await apiRequest.post('/faculty/supervisor', data);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const getAssignedStudentsService = async (supervisorId: string) => {
+    try {
+        const response = await apiRequest.get(`/faculty/supervisor/${supervisorId}/students`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const deleteSupervisorService = async (supervisorId: string) => {
+    try {
+        const response = await apiRequest.delete(`/faculty/supervisor/${supervisorId}`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const updateSupervisorService = async (supervisorId: string, data: any) => {
+    try {
+        const response = await apiRequest.put(`/faculty/supervisor/${supervisorId}`, data);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const getSupervisorService = async (supervisorId: string) => {
+    try {
+        const response = await apiRequest.get(`/faculty/supervisor/${supervisorId}`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const assignStudentsToSupervisorService = async (supervisorId: string, studentIds: string[]) => {
+    try {
+        const response = await apiRequest.post(`/faculty/supervisor/${supervisorId}/assign-students`, { studentIds });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const changeStudentSupervisorService = async (studentId: string, data: { oldSupervisorId: string, newSupervisorId: string, reason: string }) => {
+    try {
+        const response = await apiRequest.put(`/faculty/students/${studentId}/change-supervisor`, data);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};

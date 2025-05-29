@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals, getAllExaminersService, getExaminerService, getBookService, getStudentBooksService, getAllBooksService, getProgressTrendsService, getStatusStatisticsService, getDashboardStatsService, getNotificationsService, getProposalDefensesService, getAllSupervisorsService, getChairpersonsService, getExternalPersonsService, getExternalPersonsByRoleService, getProposalDefenseReportsService, } from './api.js';
+import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals, getAllExaminersService, getExaminerService, getBookService, getStudentBooksService, getAllBooksService, getProgressTrendsService, getStatusStatisticsService, getDashboardStatsService, getNotificationsService, getProposalDefensesService, getAllSupervisorsService, getChairpersonsService, getExternalPersonsService, getExternalPersonsByRoleService, getProposalDefenseReportsService, getAllFacultyService, getAllCampusesService, getAllDepartmentsService, getAllSchoolsService, getAssignedStudentsService, getSupervisorService, } from './api.js';
 
 // Common options for most queries
 function getDefaultQueryOptions() {
@@ -306,3 +306,63 @@ export const useGetExternalPersonsByRole = (role: string) => {
   });
 };
 
+/* ********** FACULTY ********** */
+export const useGetAllFaculty = () => {
+  return useQuery({
+    queryKey: ['faculty'],
+    queryFn: getAllFacultyService,
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+  });
+};
+
+
+export const useGetAllCampuses = () => {
+  return useQuery({
+    queryKey: ['campuses'],
+    queryFn: getAllCampusesService,
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+  });
+};
+
+/* ********** DEPARTMENTS ********** */
+export const useGetAllDepartments = (schoolId: string) => {
+  return useQuery({
+    queryKey: ['departments', schoolId],
+    queryFn: () => getAllDepartmentsService(schoolId),
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+    enabled: !!schoolId
+  });
+};
+
+/* ********** SCHOOLS ********** */
+export const useGetAllSchools = () => {
+  return useQuery({
+    queryKey: ['schools'],
+    queryFn: getAllSchoolsService,
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+  });
+};
+
+export const useGetAssignedStudents = (supervisorId: string) => {
+  return useQuery({
+    queryKey: ['assignedStudents', supervisorId],
+    queryFn: () => getAssignedStudentsService(supervisorId),
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+    enabled: !!supervisorId
+  });
+};
+
+export const useGetSupervisor = (id: string) => {
+  return useQuery({
+    queryKey: ['supervisor', id],
+    queryFn: () => getSupervisorService(id),
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+    enabled: !!id
+  });
+};
