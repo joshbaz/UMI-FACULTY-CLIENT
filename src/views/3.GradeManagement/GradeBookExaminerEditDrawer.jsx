@@ -21,7 +21,7 @@ const validationSchema = Yup.object({
     .required("Mark is required")
     .min(0, "Mark must be at least 0")
     .max(100, "Mark cannot exceed 100"),
-  comments: Yup.string().required("Comments are required"),
+  // comments: Yup.string().required("Comments are required"),
 });
 
 const GradeBookExaminerEditDrawer = ({
@@ -141,7 +141,7 @@ const GradeBookExaminerEditDrawer = ({
               {/* Comments */}
               <div className="space-y-2">
                 <Label className="text-sm font-[Inter-Regular] text-gray-800">
-                  Comments
+                  Comments (Optional)
                 </Label>
                 <Field
                   as={Textarea}
