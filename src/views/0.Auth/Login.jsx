@@ -75,6 +75,18 @@ const Login = () => {
           <img src={logo} alt="UMI Logo" className="mx-auto h-32" />
         </div>
 
+        <div className="flex gap-4 mb-4"> 
+          <button
+            className={`flex-1 h-10 px-3 py-2 rounded-md font-medium text-sm bg-[#E5F1FB] border border-[#ECF6FB]
+               
+            `}
+           
+          >
+            School Portal
+          </button>
+        
+        </div>
+
         <div className="bg-white py-8 px-10 shadow rounded-lg">
           <h2 className="text-2xl font-semibold text-center mb-8">Login</h2>
           <form onSubmit={formik.handleSubmit}>
