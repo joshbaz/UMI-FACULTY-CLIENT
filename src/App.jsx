@@ -32,11 +32,13 @@ import AddSupervisor from "./views/4.faculty/AddSupervisor";
 import SupervisorProfile from "./views/4.faculty/SupervisorProfile";
 import AssignStudents from "./views/4.faculty/AssignStudents";
 import ChangeSupervisor from "./views/2.StudentManagement/ChangeSupervisor";
+import PWAInstaller from "./components/PWAInstaller";
 // import ResetPassword from "./views/0.Auth/ResetPassword";
 
 function App() {
   return (
     <>
+      <PWAInstaller />
       <AuthContextProvider>
         <Router>
           <Routes>
