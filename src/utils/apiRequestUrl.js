@@ -1,10 +1,17 @@
 
 import axios from 'axios'
 
-export const BASE_API_URL = 'http://localhost:5000/api/v1';
-// export const BASE_API_URL = 'https://drims.alero.digital/api/v1';
+// export const BASE_API_URL = 'http://localhost:5000/api/v1';
+export const BASE_API_URL = 'http://drims.alero.digital/api/v1';
 
-export const socketUrl = "localhost:5000"
+export const socketUrl = "http://drims.alero.digital"
+// export const socketUrl = "localhost:5000"
+
+
+// export const socketUrl =
+//   process.env.NODE_ENV === "production"
+//     ? "drims.alero.digital:5000"
+//     : "localhost:5000";
 
 const apiRequest = axios.create({
     baseURL: BASE_API_URL,
