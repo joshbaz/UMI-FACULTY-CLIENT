@@ -363,14 +363,17 @@ const GradeProposal = () => {
                 isProposalActive={isProposalActive}
               />
           )}
+
           
+{/* 
+// to be removed
 {activeTab === "Reports" && (
   <GradeProposalReportsTable
     reports={proposal?.proposal?.defenseReports || []}
     isLoading={isLoading}
     onGenerateReportClick={() => setIsDefenseReportDialogOpen(true)}
   />
-)}
+)} */}
         </div>
       </div>
 
