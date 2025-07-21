@@ -203,7 +203,7 @@ const StudentProfileProgressBookDrawer = ({ isOpen, onClose, bookData, studentDa
               </div>
 
               {/* External Examiners */}
-              <div>
+              {/* <div>
                 <div className="flex justify-between items-center mb-2">
                   <Label className="text-sm font-[Inter-Regular] text-gray-500">External Examiners</Label>
                 </div>
@@ -231,7 +231,7 @@ const StudentProfileProgressBookDrawer = ({ isOpen, onClose, bookData, studentDa
                     <p className="text-gray-500 text-sm italic">No external examiners assigned</p>
                   )}
                 </div>
-              </div>
+              </div> */}
 
               {/* More Details Button */}
               <div className="mt-5 w-full flex justify-center mx-auto">
