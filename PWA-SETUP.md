@@ -1,7 +1,7 @@
-# UMI Faculty Portal - Progressive Web App (PWA) Setup
+# UMI School Portal - Progressive Web App (PWA) Setup
 
 ## Overview
-The UMI Faculty Portal has been converted to a Progressive Web App (PWA), enabling users to install it on their desktop and mobile devices for a native app-like experience.
+The UMI School Portal has been converted to a Progressive Web App (PWA), enabling users to install it on their desktop and mobile devices for a native app-like experience.
 
 ## Features
 - **Installable**: Can be installed on desktop and mobile devices
@@ -14,7 +14,7 @@ The UMI Faculty Portal has been converted to a Progressive Web App (PWA), enabli
 ## Installation
 
 ### Desktop (Chrome, Edge, Safari)
-1. Open the UMI Faculty Portal in your browser
+1. Open the UMI School Portal in your browser
 2. Look for the install prompt or click the install icon in the address bar
 3. Click "Install" when prompted
 4. The app will be installed and can be launched from your desktop
@@ -57,7 +57,7 @@ The UMI Faculty Portal has been converted to a Progressive Web App (PWA), enabli
 The PWAInstaller component provides:
 - Install prompts when PWA is available
 - Debug information in development mode
-- Purple-themed UI matching faculty portal design
+- Purple-themed UI matching school portal design
 - Session-based install prompt management
 
 ## Offline Capabilities
@@ -90,7 +90,7 @@ The build process generates:
 
 ## Faculty-Specific Features
 - Purple theme color (#7c3aed) for faculty branding
-- "UMI Faculty Portal" app name and short name
+- "UMI School Portal" app name and short name
 - Faculty-specific icon and splash screens
 - Optimized for faculty workflow and document management
 

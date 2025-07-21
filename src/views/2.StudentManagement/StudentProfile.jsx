@@ -73,7 +73,7 @@ const StudentProfile = () => {
     <div ref={containerRef} className="min-h-full bg-gray-50">
        {/* Top Search Bar */}
       <div className="flex px-6 justify-between items-center border-b border-gray-300 h-[89px]">
-        <p className="text-sm font-[Inter-SemiBold]  text-gray-900">Faculty Portal</p>
+        <p className="text-sm font-[Inter-SemiBold]  text-gray-900">School Portal</p>
         <p className="text-sm font-[Inter-Medium]  text-gray-600">Digital Research Information Management System</p>
       </div>
 

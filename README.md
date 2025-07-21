@@ -1,7 +1,7 @@
 
-# UMI Faculty Portal
+# UMI School Portal
 
-A Progressive Web App (PWA) for the University Management Information System faculty portal, enabling faculty members to manage students, grades, and administrative tasks.
+A Progressive Web App (PWA) for the University Management Information System school portal, enabling faculty members to manage students, grades, and administrative tasks.
 
 ## Features
 

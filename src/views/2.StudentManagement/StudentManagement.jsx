@@ -82,7 +82,7 @@ const StudentManagement = () => {
       {/* Top Search Bar */}
       <div className="flex items-center justify-between  px-6 pb-0 w-full h-[88px] border-b border-gray-200">
         {/* <h2 className="text-lg font-[Inter-SemiBold] text-gray-800">DRIMS</h2> */}
-        <p className="text-sm font-[Inter-SemiBold]  text-gray-900">Faculty Portal</p>
+        <p className="text-sm font-[Inter-SemiBold]  text-gray-900">School Portal</p>
         <p className="text-sm font-[Inter-Medium]  text-gray-600">Digital Research Information Management System</p>
       </div>
       
