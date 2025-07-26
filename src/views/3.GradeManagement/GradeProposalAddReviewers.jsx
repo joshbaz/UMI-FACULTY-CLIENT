@@ -3,8 +3,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { Search, Plus, X, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { useGetProposal, useGetReviewers } from "../../store/tanstackStore/services/queries";
-import { createReviewerService, addReviewersService } from "../../store/tanstackStore/services/api";
+import { useGetProposal, useGetStaffMembers } from "../../store/tanstackStore/services/queries";
+import { addReviewersService } from "../../store/tanstackStore/services/api";
 import { queryClient } from "@/utils/tanstack";
 import {
   useReactTable,
@@ -12,6 +12,14 @@ import {
   flexRender,
   createColumnHelper
 } from "@tanstack/react-table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import AddStaffMember from '../12.staff/AddStaffMember';
 // import { Icon } from "@iconify/react";
 
 const GradeProposalAddReviewers = () => {
@@ -26,48 +34,22 @@ const GradeProposalAddReviewers = () => {
   );
   const [selectedReviewers, setSelectedReviewers] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [newReviewer, setNewReviewer] = useState({
-    name: "",
-    email: "",
-    primaryPhone: "",
-    secondaryPhone: "",
-    institution: "Uganda Management Institute",
-    specialization: ""
-  });
-
-  // Specialization options
-  const specializationOptions = [
-    "Computer Science",
-    "Business Administration",
-    "Finance",
-    "Economics",
-    "Public Administration",
-    "Human Resource Management",
-    "Project Management",
-    "Information Technology",
-    "Data Science",
-    "Marketing",
-    "Accounting",
-    "Education",
-    "Engineering",
-    "Health Sciences",
-    "Law",
-    "Social Sciences",
-    "Other"
-  ];
 
   // Query to fetch proposal details
   const { data: proposalData, isLoading: isProposalLoading, error: proposalError } = useGetProposal(proposalId);
   
-  // Query to fetch all reviewers
-  const { data: reviewersData, isLoading: isReviewersLoading, error: reviewersError } = useGetReviewers();
+  // Query to fetch all staff members
+  const { data: staffMembersData, isLoading: isStaffMembersLoading, error: staffMembersError } = useGetStaffMembers();
 
  
   // Mutation for assigning reviewers
   const addReviewersMutation = useMutation({
-    mutationFn: () => addReviewersService(proposalId, selectedReviewers),
+    mutationFn: () => {
+      const staffMemberIds = selectedReviewers.map(staffMember => staffMember.id);
+      return addReviewersService(proposalId, staffMemberIds);
+    },
     onSuccess: (data) => {
-      toast.success(data?.message || "Reviewers added successfully", {
+      toast.success(data?.message || "Staff members assigned as reviewers successfully", {
         duration: 5000,
         action: {
           label: "Undo",
@@ -75,6 +57,8 @@ const GradeProposalAddReviewers = () => {
         }
       });
       queryClient.resetQueries({ queryKey: ['proposal', proposalId] });
+      queryClient.resetQueries({ queryKey: ['staffMembers'] });
+      queryClient.resetQueries({ queryKey: ['reviewers'] });
       navigate(-1);
     },
     onError: (error) => {
@@ -89,29 +73,6 @@ const GradeProposalAddReviewers = () => {
     }
   });
 
-  // Mutation for creating a new reviewer
-  const createReviewerMutation = useMutation({
-    mutationFn: createReviewerService,
-    onSuccess: (data) => {
-      toast.success(data?.message || "Reviewer created successfully");
-      setSelectedReviewers(prev => [...prev, data.reviewer]);
-      setShowModal(false);
-      setNewReviewer({ 
-        name: "", 
-        email: "", 
-        primaryPhone: "", 
-        secondaryPhone: "", 
-        institution: "Uganda Management Institute",
-        specialization: ""
-      });
-      queryClient.resetQueries({ queryKey: ['reviewers'] });
-    },
-    onError: (error) => {
-      console.error("Error creating reviewer:", error);
-      toast.error(error?.message || "Error creating reviewer. Please try again.");
-    }
-  });
-
   // Save pagination state to localStorage
   useEffect(() => {
     localStorage.setItem("pageSize", pageSize);
@@ -120,18 +81,38 @@ const GradeProposalAddReviewers = () => {
 
   // Filter reviewers based on search
   const filteredReviewers = useMemo(() => {
-    if (!reviewersData?.reviewers) return [];
+    const staffMembers = staffMembersData?.staffMembers || [];
     
-    return reviewersData.reviewers.filter((reviewer) => {
+    // Only show staff members who don't already have a reviewer role
+    const availableStaffMembers = staffMembers.filter(staff => !staff.reviewerId);
+    
+    const allPersonnel = availableStaffMembers.map(staff => ({
+      ...staff,
+      type: 'staff',
+      id: staff.id,
+      name: staff.name,
+      email: staff.email,
+      institution: staff.isExternal ? staff.externalInstitution : 'Uganda Management Institute',
+      specialization: staff.specialization || 'Not specified'
+    }));
+    
+    // Remove duplicates based on email
+    const uniquePersonnel = allPersonnel.filter((person, index, self) => 
+      index === self.findIndex(p => p.email === person.email)
+    );
+    
+    if (!searchTerm) return uniquePersonnel;
+    
+    return uniquePersonnel.filter((person) => {
       const matchesSearch =
-        reviewer?.name
+        person?.name
           ?.toLowerCase()
           ?.includes(searchTerm?.toLowerCase()) ||
-        reviewer?.email?.toLowerCase()?.includes(searchTerm?.toLowerCase());
+        person?.email?.toLowerCase()?.includes(searchTerm?.toLowerCase());
       
       return matchesSearch;
     });
-  }, [reviewersData, searchTerm]);
+  }, [staffMembersData, searchTerm]);
 
   // Pagination logic with useMemo
   const paginatedReviewers = useMemo(() => {
@@ -150,34 +131,25 @@ const GradeProposalAddReviewers = () => {
     return paginatedData;
   }, [filteredReviewers, currentPage, pageSize]);
 
-  const handleAssignToggle = (reviewer) => {
-    setSelectedReviewers(prev => {
-      const isSelected = prev.find(r => r.id === reviewer.id);
-      if (isSelected) {
-        return prev.filter(r => r.id !== reviewer.id);
-      } else {
-        return [...prev, reviewer];
-      }
-    });
+  const handleAssignToggle = (staffMember) => {
+    const isSelected = selectedReviewers.some(r => r.id === staffMember.id);
+    
+    if (isSelected) {
+      // Remove from selected reviewers
+      setSelectedReviewers(prev => prev.filter(r => r.id !== staffMember.id));
+    } else {
+      // Add to selected reviewers (don't convert yet)
+      setSelectedReviewers(prev => [...prev, staffMember]);
+    }
   };
 
   const handleSave = () => {
     if (selectedReviewers.length > 0) {
+      // Send staff member IDs directly to the backend
+      // The backend will handle conversion if needed
+      const staffMemberIds = selectedReviewers.map(staffMember => staffMember.id);
       addReviewersMutation.mutate();
     }
-  };
-
-  const handleCreateReviewer = (e) => {
-    e.preventDefault();
-    createReviewerMutation.mutate(newReviewer);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewReviewer(prev => ({
-      ...prev,
-      [name]: value
-    }));
   };
 
   // Calculate total pages
@@ -211,18 +183,18 @@ const GradeProposalAddReviewers = () => {
     columnHelper.accessor('id', {
       header: 'Action',
       cell: info => {
-        const reviewer = info.row.original;
-        const isSelected = selectedReviewers.some(r => r.id === reviewer.id);
+        const staffMember = info.row.original;
+        const isSelected = selectedReviewers.some(r => r.id === staffMember.id);
         return (
           <button
-            onClick={() => handleAssignToggle(reviewer)}
+            onClick={() => handleAssignToggle(staffMember)}
             className={`px-3 py-1 text-xs font-medium rounded-md ${
               isSelected
                 ? 'bg-red-100 text-red-800 hover:bg-red-200'
                 : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
             }`}
           >
-            {isSelected ? 'Unassign' : 'Assign'}
+            {isSelected ? 'Unassign' : 'Select'}
           </button>
         );
       }
@@ -235,14 +207,14 @@ const GradeProposalAddReviewers = () => {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  if (isProposalLoading || isReviewersLoading) {
+  if (isProposalLoading || isStaffMembersLoading) {
     return <div className="p-6">Loading...</div>;
   }
 
-  if (proposalError || reviewersError) {
+  if (proposalError || staffMembersError) {
     return (
       <div className="p-6 text-red-500">
-        Error loading data: {proposalError?.message || reviewersError?.message}
+        Error loading data: {proposalError?.message || staffMembersError?.message}
       </div>
     );
   }
@@ -283,9 +255,9 @@ const GradeProposalAddReviewers = () => {
           {/* Tabs */}
           <div className="flex flex-row items-center gap-8 border-b min-h-[68px] px-6 ">
             <h2 className="text-lg font-semibold">
-              Assign Reviewers:{" "}
+              Select Staff Members:{" "}
               <span className="text-sm text-gray-500">
-                ({selectedReviewers.length}) Reviewers Selected
+                ({selectedReviewers.length}) Staff Members Selected
               </span>
             </h2>
           </div>
@@ -293,7 +265,7 @@ const GradeProposalAddReviewers = () => {
           <div className="flex justify-between items-center my-4 px-6">
             <div className="relative w-[600px]">
               <h2 className="text-sm font-normal text-[#626263]">
-                All available reviewers are shown in this table. Use the search to find the reviewer you want, then click 'Assign' to link them to the proposal.
+                All available staff members are shown in this table. Use the search to find the staff member you want, then click 'Select' to add them to your selection. When you save, staff members will be automatically converted to reviewers if needed and assigned to the proposal.
               </h2>
             </div>
           </div>
@@ -319,7 +291,7 @@ const GradeProposalAddReviewers = () => {
                 className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg gap-2 hover:bg-green-700"
               >
                 <Plus className="w-4 h-4" />
-                Add New Reviewer
+                Add New Staff Member
               </button>
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-600">Show:</span>
@@ -383,8 +355,8 @@ const GradeProposalAddReviewers = () => {
                   ) : (
                     <tr>
                       <td colSpan={columns.length} className="px-6 py-8 text-center text-gray-500">
-                        <div className="text-sm font-medium">No reviewers found</div>
-                        <div className="text-xs mt-1">Please add a new reviewer or adjust your search criteria</div>
+                        <div className="text-sm font-medium">No staff members found</div>
+                        <div className="text-xs mt-1">Please add a new staff member or adjust your search criteria</div>
                       </td>
                     </tr>
                   )}
@@ -451,155 +423,31 @@ const GradeProposalAddReviewers = () => {
               disabled={selectedReviewers.length === 0 || addReviewersMutation.isPending}
               className="min-w-[200px] text-lg flex items-center justify-center px-4 py-2 bg-primary-500 text-white rounded-lg gap-2 hover:bg-primary-900 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {addReviewersMutation.isPending ? 'Saving...' : 'Save'}
+              {addReviewersMutation.isPending ? 'Saving...' : 'Save Reviewers'}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Dialog for adding new reviewer */}
-      <dialog
-        open={showModal}
-        className="fixed inset-0 z-50 bg-transparent"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) setShowModal(false);
-        }}
-      >
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Add New Reviewer</h3>
-              <button 
-                onClick={() => setShowModal(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleCreateReviewer}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={newReviewer.name}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Dr. John Smith"
-                />
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={newReviewer.email}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="john.smith@example.com"
-                />
-              </div>
-              
-              <div className="mb-4 grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Primary Phone
-                  </label>
-                  <input
-                    type="tel"
-                    name="primaryPhone"
-                    value={newReviewer.primaryPhone}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Secondary Phone
-                  </label>
-                  <input
-                    type="tel"
-                    name="secondaryPhone"
-                    value={newReviewer.secondaryPhone}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="+1 (555) 987-6543"
-                  />
-                </div>
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Institution
-                </label>
-                <input
-                  type="text"
-                  name="institution"
-                  value={newReviewer.institution}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="University of Example"
-                />
-              </div>
-              
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Area of Specialization
-                </label>
-                <select
-                  name="specialization"
-                  value={newReviewer.specialization}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select a specialization</option>
-                  {specializationOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-                {newReviewer.specialization === "Other" && (
-                  <input
-                    type="text"
-                    name="customSpecialization"
-                    value={newReviewer.customSpecialization || ""}
-                    onChange={handleInputChange}
-                    className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Please specify your specialization"
-                  />
-                )}
-              </div>
-              
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={createReviewerMutation.isPending}
-                  className="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 disabled:opacity-50"
-                >
-                  {createReviewerMutation.isPending ? 'Creating...' : 'Create Reviewer'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </dialog>
+      {/* Add Staff Member Dialog */}
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent className="min-w-4xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Staff Member</DialogTitle>
+            <DialogDescription>
+              Add a new academic staff member to the system.
+            </DialogDescription>
+          </DialogHeader>
+          <AddStaffMember 
+            onSuccess={() => {
+              setShowModal(false);
+              queryClient.resetQueries({ queryKey: ['staffMembers'] });
+              toast.success('Staff member added successfully');
+            }}
+            onCancel={() => setShowModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
