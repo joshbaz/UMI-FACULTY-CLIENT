@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals, getAllExaminersService, getExaminerService, getBookService, getStudentBooksService, getAllBooksService, getProgressTrendsService, getStatusStatisticsService, getDashboardStatsService, getNotificationsService, getProposalDefensesService, getAllSupervisorsService, getChairpersonsService, getExternalPersonsService, getExternalPersonsByRoleService, getProposalDefenseReportsService, getAllFacultyService, getAllCampusesService, getAllDepartmentsService, getAllSchoolsService, getAssignedStudentsService, getSupervisorService, } from './api.js';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { getAllStudents, getFacultyProfile, getStudent, getStudentStatuses, getStudentProposals, getProposal, getReviewersService, getPanelistsService, getSchoolProposals, getAllExaminersService, getExaminerService, getBookService, getStudentBooksService, getAllBooksService, getProgressTrendsService, getStatusStatisticsService, getDashboardStatsService, getNotificationsService, getProposalDefensesService, getAllSupervisorsService, getChairpersonsService, getExternalPersonsService, getExternalPersonsByRoleService, getProposalDefenseReportsService, getAllFacultyService, getAllCampusesService, getAllDepartmentsService, getAllSchoolsService, getAssignedStudentsService, getSupervisorService, getStaffMembersService, createStaffMemberService } from './api.js';
+import { queryClient } from '@/utils/tanstack';
 
 // Common options for most queries
 function getDefaultQueryOptions() {
@@ -364,5 +365,29 @@ export const useGetSupervisor = (id: string) => {
     staleTime: Infinity, // 1 minute
     refetchInterval: false,
     enabled: !!id
+  });
+};
+
+/* ********** STAFF MEMBERS ********** */
+
+export const useGetStaffMembers = () => {
+  return useQuery({
+    queryKey: ['staffMembers'],
+    queryFn: getStaffMembersService,
+    staleTime: Infinity, // 1 minute
+    refetchInterval: false,
+    networkMode: 'online',
+  });
+};
+
+export const useCreateStaffMember = () => {
+  return useMutation({
+    mutationFn: async (staffData: any) => {
+      const response = await createStaffMemberService(staffData);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['staffMembers'] });
+    },
   });
 };

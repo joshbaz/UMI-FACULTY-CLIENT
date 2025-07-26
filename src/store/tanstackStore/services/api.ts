@@ -212,16 +212,6 @@ export const downloadProposalDefenseReportService = async (reportId) => {
 /* ********** END OF PROPOSAL MANAGEMENT ********** */
 
 /* ********** REVIEWER MANAGEMENT ********** */
-export const createReviewerService = async (data: any) => {
-    try {
-        const response = await apiRequest.post(`/faculty/reviewer`, data)
-        return response.data
-        
-    } catch (error) {
-        errorHandling(error)
-    }
-}
-
 export const addReviewersService = async (proposalId: string, reviewers: any) => {
     try {
         const response = await apiRequest.post(`/faculty/reviewers/${proposalId}`, { reviewers })
@@ -737,7 +727,54 @@ export const assignStudentsToSupervisorService = async (supervisorId: string, st
 
 export const changeStudentSupervisorService = async (studentId: string, data: { oldSupervisorId: string, newSupervisorId: string, reason: string }) => {
     try {
-        const response = await apiRequest.put(`/faculty/students/${studentId}/change-supervisor`, data);
+        const response = await apiRequest.put(`/faculty/students/${studentId}/change-supervisor`, data)
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}
+
+/* ********** STAFF MEMBERS ********** */
+
+export const getStaffMembersService = async () => {
+    try {
+        const response = await apiRequest.get("/faculty/staff")
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}
+
+export const createStaffMemberService = async (staffData: any) => {
+    try {
+        const response = await apiRequest.post("/faculty/staff", staffData);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+export const convertStaffToReviewerService = async (staffMemberId: string) => {
+    try {
+        const response = await apiRequest.post(`/faculty/staff/${staffMemberId}/convert-to-reviewer`)
+        return response.data
+    } catch (error) {
+        errorHandling(error)
+    }
+}
+
+export const createReviewerFromStaffService = async (staffMemberId: string) => {
+    try {
+        const response = await apiRequest.post(`/faculty/staff/${staffMemberId}/convert-to-reviewer`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const createPanelistFromStaffService = async (staffMemberId: string) => {
+    try {
+        const response = await apiRequest.post(`/faculty/staff/${staffMemberId}/convert-to-panelist`);
         return response.data;
     } catch (error) {
         errorHandling(error);
