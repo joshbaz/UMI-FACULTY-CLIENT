@@ -344,14 +344,7 @@ export const updateEthicsCommitteeDateService = async (proposalId: string, ethic
 
 /* ********** EXAMINER MANAGEMENT ********** */
 
-export const createExaminerService = async (examinerData: any) => {
-    try {
-        const response = await apiRequest.post('/faculty/examiners', examinerData);
-        return response.data;
-    } catch (error) {
-        errorHandling(error);
-    }
-}
+
 
 export const getAllExaminersService = async () => {
     try {
@@ -391,17 +384,14 @@ export const deleteExaminerService = async (examinerId: string) => {
 
 /* ********** EXAMINER ASSIGNMENT MANAGEMENT ********** */
 
-export const assignExaminersToBookService = async (bookId: string, examinerIds: string[], assignmentDate: string) => {
+export const assignExaminersToBookService = async (bookId: string, staffMemberIds: string[]) => {
     try {
-        const response = await apiRequest.post(`/faculty/books/${bookId}/examiners`, {
-            examinerIds,
-            assignmentDate
-        });
+        const response = await apiRequest.post(`/faculty/books/${bookId}/examiners`, { staffMemberIds });
         return response.data;
     } catch (error) {
         errorHandling(error);
     }
-}
+};
 
 export const updateInternalExaminerMarkService = async (assignmentId: string, mark: number, comments: string) => {
     try {
