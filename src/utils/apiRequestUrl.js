@@ -2,9 +2,9 @@
 import axios from 'axios'
 
 // export const BASE_API_URL = 'http://localhost:5000/api/v1';
-export const BASE_API_URL = 'https://drimsumi.alero.digital/api/v1';
+export const BASE_API_URL = 'https://drimsapi.umi.ac.ug/api/v1';
 
-export const socketUrl = "https://drimsumi.alero.digital"
+export const socketUrl = "https://drimsapi.umi.ac.ug"
 // export const socketUrl = "localhost:5000"
 
 
