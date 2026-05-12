@@ -23,6 +23,7 @@ const AssignStudents = () => {
     parseInt(localStorage.getItem("currentPage")) || 1
   );
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const [role, setRole] = useState("MAIN");
 
   // Query to fetch all students
   const { data: studentsData, isLoading, error } = useGetAllStudents();
@@ -32,8 +33,8 @@ const AssignStudents = () => {
 
   // Mutation for assigning students
   const assignStudentsMutation = useMutation({
-    mutationFn: ({ supervisorId, studentIds }) => 
-      assignStudentsToSupervisorService(supervisorId, studentIds),
+    mutationFn: ({ supervisorId, studentIds, role }) => 
+      assignStudentsToSupervisorService(supervisorId, studentIds, role),
     onSuccess: (data) => {
       toast.success(data?.message || "Students assigned successfully",{
         duration: 5000,
@@ -123,7 +124,7 @@ const AssignStudents = () => {
 
   const handleSave = () => {
     const studentIds = selectedStudents.map(student => student.id);
-    assignStudentsMutation.mutate({ supervisorId: id, studentIds });
+    assignStudentsMutation.mutate({ supervisorId: id, studentIds, role });
   };
 
 
@@ -177,6 +178,17 @@ const AssignStudents = () => {
               <span className="text-lg font-medium text-gray-900">
                 {supervisorData?.supervisor?.title} {supervisorData?.supervisor?.name}
               </span>
+              <div className="ml-8 flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-700">Assign as:</span>
+                <select 
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="MAIN">Main Supervisor</option>
+                  <option value="CO_SUPERVISOR">Co-Supervisor</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>

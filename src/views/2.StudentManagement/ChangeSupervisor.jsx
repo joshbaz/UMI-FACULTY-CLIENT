@@ -51,9 +51,9 @@ const ChangeSupervisor = () => {
   // Set initial values based on URL params
   useEffect(() => {
     if (student && supervisorIdFromUrl) {
-      const supervisor = supervisors.find(s => s.id === supervisorIdFromUrl);
-      if (supervisor) {
-        setIsPrimary(supervisor.isPrimary);
+      const role = student?.supervisorRoles?.[supervisorIdFromUrl];
+      if (role) {
+        setIsPrimary(role === "MAIN");
       }
     }
   }, [student, supervisorIdFromUrl, supervisors]);
@@ -63,7 +63,8 @@ const ChangeSupervisor = () => {
       return changeStudentSupervisorService(id, {
         oldSupervisorId: supervisorToReplace,
         newSupervisorId: selectedSupervisor,
-        reason: reason
+        reason: reason,
+        role: isPrimary ? "MAIN" : "CO_SUPERVISOR"
       });
     },
     onSuccess: () => {
@@ -139,11 +140,15 @@ const ChangeSupervisor = () => {
                   <SelectValue placeholder="Select supervisor to replace" />
                 </SelectTrigger>
                 <SelectContent>
-                  {supervisors.map((supervisor) => (
-                    <SelectItem key={supervisor.id} value={supervisor.id}>
-                      {supervisor.title} {supervisor.name} ({supervisor.isPrimary ? "Primary" : "Secondary"})
-                    </SelectItem>
-                  ))}
+                  {supervisors.map((supervisor) => {
+                    const role = student?.supervisorRoles?.[supervisor.id];
+                    const roleLabel = role === "MAIN" ? "Main Supervisor" : (role === "CO_SUPERVISOR" ? "Co-Supervisor" : "Supervisor");
+                    return (
+                      <SelectItem key={supervisor.id} value={supervisor.id}>
+                        {supervisor.title} {supervisor.name} ({roleLabel})
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
@@ -169,17 +174,17 @@ const ChangeSupervisor = () => {
             </div>
             
             <div>
-              <Label htmlFor="supervisorType">Supervisor Type</Label>
+              <Label htmlFor="supervisorType">Supervisor Role</Label>
               <Select 
-                value={isPrimary ? "primary" : "secondary"} 
-                onValueChange={(value) => setIsPrimary(value === "primary")}
+                value={isPrimary ? "MAIN" : "CO_SUPERVISOR"} 
+                onValueChange={(value) => setIsPrimary(value === "MAIN")}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select supervisor type" />
+                  <SelectValue placeholder="Select supervisor role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="primary">Primary</SelectItem>
-                  <SelectItem value="secondary">Secondary</SelectItem>
+                  <SelectItem value="MAIN">Main Supervisor</SelectItem>
+                  <SelectItem value="CO_SUPERVISOR">Co-Supervisor</SelectItem>
                 </SelectContent>
               </Select>
             </div>
