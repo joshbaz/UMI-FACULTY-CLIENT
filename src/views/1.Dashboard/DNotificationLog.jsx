@@ -49,9 +49,7 @@ const DNotificationLog = () => {
 
   // Format notification message
   const formatMessage = (notification) => {
-    const studentName = notification?.studentStatus?.student 
-      ? `${notification.studentStatus.student.firstName} ${notification.studentStatus.student.lastName}`
-      : 'A student';
+    const studentName = notification?.studentStatus?.student?.fullName || 'A student';
     
     switch(notification.type) {
       case 'STUDENT_ADDED':

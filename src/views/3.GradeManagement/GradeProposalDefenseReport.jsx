@@ -50,13 +50,13 @@ const GradeProposalDefenseReport = ({ isOpen, onClose, proposal }) => {
       // Correctly access supervisors from the student
       const supervisors =
         student?.supervisors
-          ?.map((sup) => `${sup.user.firstName} ${sup.user.lastName}`)
+          ?.map((sup) => sup.user.name)
           .join(", ") || "None";
 
       // Get first supervisor for signature
       const mainSupervisor =
         student?.supervisors?.length > 0
-          ? `${student.supervisors[0].user.firstName} ${student.supervisors[0].user.lastName}`
+          ? student.supervisors[0].user.name
           : "Supervisor Name";
 
       // Get defense verdict from the proposal statuses
@@ -73,7 +73,7 @@ const GradeProposalDefenseReport = ({ isOpen, onClose, proposal }) => {
         : "Not Available";
 
       setReportData({
-        studentName: `${student?.firstName || ""} ${student?.lastName || ""}`,
+        studentName: student?.fullName || "N/A",
         regNo: student?.regNo || "N/A",
         topic: topic || "N/A",
         supervisors,

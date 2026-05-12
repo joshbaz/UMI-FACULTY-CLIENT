@@ -43,8 +43,7 @@ const StudentManagement = () => {
       (student) =>
         (selectedCategory === "All Students" ||
           student?.programLevel === selectedCategory) &&
-        (student?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          student?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (student?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           student?.email?.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [studentsData?.students, selectedCategory, searchTerm]);

@@ -57,7 +57,7 @@ const GradeProposalGenerateFieldLetter = ({ isOpen, onClose, proposal }) => {
       // Set the template variables
       doc.setData({
         currentDate: format(new Date(), 'MMMM dd, yyyy'),
-        studentName: `${proposal?.student?.firstName?.charAt(0).toUpperCase()}${proposal?.student?.firstName?.slice(1)} ${proposal?.student?.lastName?.charAt(0).toUpperCase()}${proposal?.student?.lastName?.slice(1)}` || '[Student Name]',
+        studentName: proposal?.student?.fullName || '[Student Name]',
         proposalTitle: `${proposal?.title}` || '[Proposal Title]',
         supervisorName: `${proposal?.supervisor?.name}` || '[Supervisor Name]',
         department: `${proposal?.supervisor?.department}` || '[Department Name]',
@@ -105,7 +105,7 @@ const GradeProposalGenerateFieldLetter = ({ isOpen, onClose, proposal }) => {
 
   const handleDownload = () => {
     if (docxBlob) {
-      saveAs(docxBlob, `field-letter-${proposal?.student?.firstName}-${proposal?.student?.lastName || 'student'}.docx`);
+      saveAs(docxBlob, `field-letter-${proposal?.student?.fullName || 'student'}.docx`);
       handleClose();
     }
   };
@@ -128,7 +128,7 @@ const GradeProposalGenerateFieldLetter = ({ isOpen, onClose, proposal }) => {
 
     try {
       const formData = new FormData();
-      formData.append('docxFile', new File([docxBlob], `field-letter-${proposal?.student?.firstName}-${proposal?.student?.lastName || 'student'}.docx`));
+      formData.append('docxFile', new File([docxBlob], `field-letter-${proposal?.student?.fullName || 'student'}.docx`));
       formData.append('proposalId', proposal?.id);
 
       mutation.mutate(formData); // Use the mutation function
@@ -150,14 +150,14 @@ const GradeProposalGenerateFieldLetter = ({ isOpen, onClose, proposal }) => {
         <div className="flex-1 py-4 grid grid-cols-3 gap-4 overflow-hidden">
           <div className="overflow-y-auto">
             <p className="text-sm text-gray-600">
-              This will generate a field letter for {`${proposal?.student?.firstName} ${proposal?.student?.lastName}` || 'the student'}.
+              This will generate a field letter for {proposal?.student?.fullName || 'the student'}.
             </p>
             <div className="mt-4 space-y-2">
               <div className="text-sm">
                 <span className="font-medium">Student: </span>
-                <span className="text-gray-600">
-                  {`${proposal?.student?.firstName} ${proposal?.student?.lastName}` || 'N/A'}
-                </span>
+                  <span className="text-gray-600">
+                    {proposal?.student?.fullName || 'N/A'}
+                  </span>
               </div>
               <div className="text-sm">
                 <span className="font-medium">Proposal Title: </span>

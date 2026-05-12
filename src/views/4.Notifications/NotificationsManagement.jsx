@@ -92,7 +92,7 @@ const NotificationsManagement = () => {
             onClick={() => handleRowClick(info.row.original.id)}
             className="text-left hover:text-primary-600"
           >
-            {info.row.original?.studentStatus?.student?.firstName} {info.row.original?.studentStatus?.student?.lastName}
+            {info.row.original?.studentStatus?.student?.fullName}
           </button>
         ),
       },

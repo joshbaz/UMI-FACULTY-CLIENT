@@ -53,7 +53,7 @@ const NotificationDrawer = ({ isOpen, onClose, notificationId }) => {
 
   // Get student name
   const studentName = notificationData?.studentStatus?.student 
-    ? `${notificationData.studentStatus.student.firstName} ${notificationData.studentStatus.student.lastName}`
+    ? notificationData.studentStatus.student.fullName
     : notificationData.studentName || 'Unknown Student';
 
   // Get student initials for avatar

@@ -23,7 +23,7 @@ const StudentManagementTable = ({students, pageSize, setPageSize}) => {
     const columns = useMemo(() => [
         columnHelper.accessor('fullname', {
           header: 'Fullname',
-          cell: ({ row }) => <span className="capitalize">{row.original.firstName} {row.original.lastName}</span>
+          cell: ({ row }) => <span className="capitalize">{row.original.fullName}</span>
         }),
         columnHelper.accessor('email', {
           header: 'Email Address'

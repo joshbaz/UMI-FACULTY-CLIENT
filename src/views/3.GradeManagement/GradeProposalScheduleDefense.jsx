@@ -238,7 +238,7 @@ const GradeProposalScheduleDefense = () => {
                   </span>
                   <span className="text-sm font-[Inter-Medium] capitalize text-gray-600">
                     Student:{" "}
-                    {`${proposalData?.proposal?.student?.firstName} ${proposalData?.proposal?.student?.lastName}` ||
+                    {proposalData?.proposal?.student?.fullName ||
                       "Not Available"}
                   </span>
                 </div>
@@ -261,7 +261,7 @@ const GradeProposalScheduleDefense = () => {
                   </p>
                   <p className="mb-2">
                     <span className="font-semibold">Student:</span>{" "}
-                    {`${proposal.student?.firstName} ${proposal.student?.lastName}`}
+                    {proposal.student?.fullName}
                   </p>
                   <p className="mb-2">
                     <span className="font-semibold">Registration Number:</span>{" "}

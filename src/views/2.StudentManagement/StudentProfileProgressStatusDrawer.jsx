@@ -20,7 +20,7 @@ const StudentProfileProgressStatusDrawer = ({ isOpen, onClose, studentId, studen
     const totalDays = startDate ? Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) : 0;
 
     const data = {
-      name: studentData?.firstName + " " + studentData?.lastName,
+      name: studentData?.fullName,
       studentId: studentData?.id,
       type: studentData?.programLevel,
       email: studentData?.email,

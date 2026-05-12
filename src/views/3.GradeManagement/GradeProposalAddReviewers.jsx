@@ -241,7 +241,7 @@ const GradeProposalAddReviewers = () => {
                   Proposal: {proposalData?.proposal?.title || "Loading..."}
                 </span>
                 <span className="text-sm font-[Inter-Medium] capitalize text-gray-600">
-                  Student: {`${proposalData?.proposal?.student?.firstName} ${proposalData?.proposal?.student?.lastName}` || "Not Available"}
+                  Student: {proposalData?.proposal?.student?.fullName || "Not Available"}
                 </span>
               </div>
             </div>

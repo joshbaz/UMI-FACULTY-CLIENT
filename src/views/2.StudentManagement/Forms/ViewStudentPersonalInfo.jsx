@@ -24,7 +24,7 @@ const ViewStudentPersonalInfo = ({ studentData }) => {
               Full Name
             </label>
             <div className="mt-2 p-2 bg-gray-50 text-base text-[Inter-Regular] rounded-[6px] border border-gray-200 capitalize">
-              {studentData?.student?.firstName} {studentData?.student?.lastName}
+              {studentData?.student?.fullName || "N/A"}
             </div>
           </div>
           <div>

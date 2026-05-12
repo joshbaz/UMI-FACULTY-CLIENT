@@ -112,7 +112,7 @@ const GradeBook = () => {
                 Back
               </button>
               <span className="text-lg font-[Inter-SemiBold] capitalize text-gray-900">
-                {`${book?.book?.student?.firstName} ${book?.book?.student?.lastName}` || "Loading..."}
+                {book?.book?.student?.fullName || "Loading..."}
               </span>
             </div>
           </div>

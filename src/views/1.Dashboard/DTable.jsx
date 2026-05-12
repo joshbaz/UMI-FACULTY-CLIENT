@@ -64,7 +64,7 @@ const DTable = () => {
       accessorKey: "fullname",
       header: () => <span className="text-sm">Fullname</span>,
       cell: (info) => {
-        return <div className="text-sm capitalize">{`${info?.row?.original?.firstName} ${info?.row?.original?.lastName}` }</div>;
+        return <div className="text-sm capitalize">{info?.row?.original?.fullName || "N/A"}</div>;
       },
     },
     

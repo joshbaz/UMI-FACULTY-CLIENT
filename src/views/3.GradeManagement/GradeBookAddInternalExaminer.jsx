@@ -309,7 +309,7 @@ const GradeBookAddInternalExaminer = () => {
                   Book: {bookData?.book?.title || "Loading..."}
                 </span>
                 <span className="text-sm font-[Inter-Medium] capitalize text-gray-600">
-                  Student: {`${bookData?.book?.student?.firstName} ${bookData?.book?.student?.lastName}` || "Not Available"}
+                  Student: {bookData?.book?.student?.fullName || "Not Available"}
                 </span>
               </div>
             </div>

@@ -201,7 +201,7 @@ const GradeProposal = () => {
                 Back
               </button>
               <span className="text-lg font-[Inter-SemiBold] capitalize text-gray-900">
-                {`${proposal?.proposal?.student?.firstName} ${proposal?.proposal?.student?.lastName}` || "Loading..."}
+                {proposal?.proposal?.student?.fullName || "Loading..."}
               </span>
             </div>
             {!isProposalActive && (

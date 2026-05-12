@@ -44,11 +44,11 @@ const AssignStudentTable = ({
   const columnHelper = createColumnHelper();
   const columns = [
     columnVisibility?.fullname && {
-      accessorKey: "firstName",
+      accessorKey: "fullName",
       header: "Fullname",
       cell: ({ row }) => (
         <span>
-          {row.original.firstName} {row.original.lastName}
+          {row.original.fullName}
         </span>
       ),
     },

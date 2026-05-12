@@ -85,10 +85,9 @@ const AssignStudents = () => {
       student.statuses?.find(s => s.isCurrent)?.definition?.name?.toLowerCase() === "workshop";
 
       const matchesSearch =
-        student?.firstName
+        student?.fullName
           ?.toLowerCase()
-          ?.includes(searchTerm?.toLowerCase()) ||
-        student?.lastName?.toLowerCase()?.includes(searchTerm?.toLowerCase());
+          ?.includes(searchTerm?.toLowerCase());
 
       return matchesCategory && matchesSearch;
     });

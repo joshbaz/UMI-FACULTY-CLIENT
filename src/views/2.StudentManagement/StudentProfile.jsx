@@ -100,7 +100,7 @@ const StudentProfile = () => {
                   Back
                 </button>
                 <span className="text-lg font-[Inter-SemiBold] capitalize text-gray-900">
-                  {studentData?.student?.firstName} {studentData?.student?.lastName}
+                  {studentData?.student?.fullName}
                 </span>
               </div>
               <div className="flex items-center gap-4">
