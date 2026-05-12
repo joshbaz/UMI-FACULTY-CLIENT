@@ -1,5 +1,5 @@
-import { createContext, useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { createContext, useEffect, useState, useCallback } from "react";
+import { queryClient } from "@/utils/tanstack";
 
 export const AuthContext = createContext();
 const TOKEN_STORAGE_KEY = 'umi_auth_token';
@@ -9,21 +9,22 @@ export const AuthContextProvider = ({ children }) => {
         return localStorage.getItem(TOKEN_STORAGE_KEY) || null;
     });
 
-    const updateUser = (data) => {
+    const updateUser = useCallback((data) => {
+        // Clear all cached queries from the previous user before setting the new token
+        queryClient.clear();
         setToken(data.token);
-        <Navigate to="/" replace />
-    };
+        localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
+    }, []);
 
-    const logout = () => {
+    const logout = useCallback(() => {
         setToken(null);
         localStorage.removeItem(TOKEN_STORAGE_KEY);
-        <Navigate to="/login" replace />
-    };
+        // Clear all cached queries so the next user gets fresh data
+        queryClient.clear();
+    }, []);
 
     useEffect(() => {
-        if (!token) {
-            <Navigate to="/login" replace />
-        } else {
+        if (token) {
             localStorage.setItem(TOKEN_STORAGE_KEY, token);
         }
     }, [token]);

@@ -43,19 +43,7 @@ const ViewStudentPersonalInfo = ({ studentData }) => {
               {studentData?.student?.phoneNumber || "N/A"}
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-[Inter-Medium] text-gray-700">
-              Date of Birth
-            </label>
-            <div className="mt-2 p-2 bg-gray-50 text-base text-[Inter-Regular] rounded-[6px] border border-gray-200">
-              {studentData?.student?.dateOfBirth
-                ? format(
-                    parseISO(studentData.student.dateOfBirth),
-                    "yyyy-MM-dd"
-                  )
-                : "N/A"}
-            </div>
-          </div>
+
           <div>
             <label className="block text-sm font-[Inter-Medium] text-gray-700">
               Gender

@@ -7,7 +7,6 @@ import { useGetFacultyProfile } from "../store/tanstackStore/services/queries";
 import { Icon } from "@iconify-icon/react";
 import { useContext, useMemo, useCallback } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useQueryClient } from '@tanstack/react-query';
 const Sidebar = () => {
   const navigate = useNavigate();
   let { logout } = useContext(AuthContext);
@@ -53,10 +52,6 @@ const Sidebar = () => {
 
   const handleLogout = useCallback(() => {
     logout();
-    // Reset all queries in the query client
-   
-    const queryClient = useQueryClient();
-    queryClient.clear(); // This clears all queries from the cache
     navigate("/login", { replace: true });
   }, [logout, navigate]);
 
