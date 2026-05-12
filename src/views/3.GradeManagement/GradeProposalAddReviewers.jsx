@@ -83,8 +83,8 @@ const GradeProposalAddReviewers = () => {
   const filteredReviewers = useMemo(() => {
     const staffMembers = staffMembersData?.staffMembers || [];
     
-    // Only show staff members who don't already have a reviewer role
-    const availableStaffMembers = staffMembers.filter(staff => !staff.reviewerId);
+    // Show all staff members (backend handles conversion if needed)
+    const availableStaffMembers = staffMembers;
     
     const allPersonnel = availableStaffMembers.map(staff => ({
       ...staff,
@@ -166,7 +166,18 @@ const GradeProposalAddReviewers = () => {
   const columns = [
     columnHelper.accessor('name', {
       header: 'Name',
-      cell: info => <div className="text-sm font-medium text-gray-900">{info.getValue()}</div>
+      cell: info => (
+        <div className="flex flex-col">
+          <div className="text-sm font-medium text-gray-900">{info.getValue()}</div>
+          {info.row.original.reviewerId && (
+            <div className="flex mt-1">
+              <span className="px-2 py-0.5 text-[10px] bg-green-100 text-green-700 rounded-full font-medium uppercase tracking-wider">
+                Already Reviewer
+              </span>
+            </div>
+          )}
+        </div>
+      )
     }),
     columnHelper.accessor('email', {
       header: 'Email',

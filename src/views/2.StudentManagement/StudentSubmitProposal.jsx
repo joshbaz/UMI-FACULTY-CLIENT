@@ -13,13 +13,12 @@ const validationSchema = Yup.object().shape({
   description: Yup.string(),
   submissionDate: Yup.date()
     .required('Submission date is required'),
-  // researchArea: Yup.string()
-  //   .required('Research area is required'),
-  // file: Yup.mixed()
-  //   .test('fileSize', 'File size must be less than 500MB', value => {
-  //     if (!value) return true;
-  //     return value.size <= 500 * 1024 * 1024;
-  //   })
+  researchArea: Yup.string().nullable(),
+  otherResearchArea: Yup.string().when('researchArea', {
+    is: 'Other',
+    then: (schema) => schema.required('Please specify the research area'),
+    otherwise: (schema) => schema.notRequired()
+  })
 });
 
 const SubmitStudentProposal = () => {
@@ -55,7 +54,8 @@ let navigate = useNavigate();
     description: '',
     file: null,
     submissionDate: '',
-    researchArea: ''
+    researchArea: '',
+    otherResearchArea: ''
   };
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -83,13 +83,13 @@ let navigate = useNavigate();
             formData.append('title', values.title);
             formData.append('description', values.description);
             formData.append('submissionDate', values.submissionDate);
-            formData.append('researchArea', values.researchArea);
+            formData.append('researchArea', values.researchArea === 'Other' ? values.otherResearchArea : values.researchArea);
             // formData.append('proposalFile', values.file);
             submitProposalMutation.mutate(formData);
             // console.log('Proposal submitted successfully')
           }}
         >
-          {({ errors, touched, setFieldValue, isSubmitting }) => (
+          {({ errors, touched, setFieldValue, isSubmitting, values }) => (
             <Form className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -106,30 +106,51 @@ let navigate = useNavigate();
                     <div className="text-red-500 text-sm mt-1">{errors.submissionDate}</div>
                   )}
                 </div>
-                <div>
-                  <label htmlFor="researchArea" className="block text-sm font-medium text-gray-700 mb-1">
-                    Research Area (Optional)
-                  </label>
-                  <Field
-                    as="select"
-                    id="researchArea"
-                    name="researchArea"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  >
-                    <option value="">Select a research area</option>
-                    <option value="Business Strategy">Business Strategy</option>
-                    <option value="Organizational Behavior">Organizational Behavior</option>
-                    <option value="Marketing Management">Marketing Management</option>
-                    <option value="Financial Management">Financial Management</option>
-                    <option value="Human Resource Management">Human Resource Management</option>
-                    <option value="Public Administration">Public Administration</option>
-                    <option value="Public Policy">Public Policy</option>
-                    <option value="Management Science">Management Science</option>
-                    <option value="Operations Management">Operations Management</option>
-                    <option value="Supply Chain Management">Supply Chain Management</option>
-                  </Field>
-                  {errors.researchArea && touched.researchArea && (
-                    <div className="text-red-500 text-sm mt-1">{errors.researchArea}</div>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="researchArea" className="block text-sm font-medium text-gray-700 mb-1">
+                      Research Area (Optional)
+                    </label>
+                    <Field
+                      as="select"
+                      id="researchArea"
+                      name="researchArea"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="">Select a research area</option>
+                      <option value="Business Strategy">Business Strategy</option>
+                      <option value="Organizational Behavior">Organizational Behavior</option>
+                      <option value="Marketing Management">Marketing Management</option>
+                      <option value="Financial Management">Financial Management</option>
+                      <option value="Human Resource Management">Human Resource Management</option>
+                      <option value="Public Administration">Public Administration</option>
+                      <option value="Public Policy">Public Policy</option>
+                      <option value="Management Science">Management Science</option>
+                      <option value="Operations Management">Operations Management</option>
+                      <option value="Supply Chain Management">Supply Chain Management</option>
+                      <option value="Other">Other</option>
+                    </Field>
+                    {errors.researchArea && touched.researchArea && (
+                      <div className="text-red-500 text-sm mt-1">{errors.researchArea}</div>
+                    )}
+                  </div>
+
+                  {values.researchArea === 'Other' && (
+                    <div>
+                      <label htmlFor="otherResearchArea" className="block text-sm font-medium text-gray-700 mb-1">
+                        Please specify Research Area
+                      </label>
+                      <Field
+                        type="text"
+                        id="otherResearchArea"
+                        name="otherResearchArea"
+                        placeholder="Enter your research area"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                      {errors.otherResearchArea && touched.otherResearchArea && (
+                        <div className="text-red-500 text-sm mt-1">{errors.otherResearchArea}</div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
