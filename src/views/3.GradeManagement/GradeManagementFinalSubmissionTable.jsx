@@ -46,15 +46,6 @@ function groupBy(arr, keyFn) {
   }, {});
 }
 
-const GroupedReportTable = ({ items, reportsColumns, TableComponent }) => {
-  const table = useReactTable({
-    data: items,
-    columns: reportsColumns,
-    getCoreRowModel: getCoreRowModel(),
-  });
-  return <TableComponent table={table} />;
-};
-
 // Separate component for school tables to avoid Rules of Hooks violation
 const SchoolTable = ({ schoolName, schoolData, onExport, currentAcademicYear, getColumnsForTab, tab = "results-approved-at-centre" }) => {
   const table = useReactTable({
@@ -134,7 +125,7 @@ const SchoolTable = ({ schoolName, schoolData, onExport, currentAcademicYear, ge
   );
 };
 
-const GradeManagementFinalSubmissionTable = ({ data, pageSize, setPageSize, currentPage, setCurrentPage, totalCount }) => {
+const GradeManagementFinalSubmissionTable = ({ data }) => {
   const [activeTab, setActiveTab] = useState("results-sent");
   const [selectedBook, setSelectedBook] = useState(null);
   const [rowSelection, setRowSelection] = useState({});
@@ -174,32 +165,6 @@ const GradeManagementFinalSubmissionTable = ({ data, pageSize, setPageSize, curr
     });
   }, [filteredData]);
 
-  const senateApprovalData = useMemo(() => {
-    return filteredData.filter(book => {
-      const hasSenateApprovalDate = book.student?.senateApprovalDate;
-      const hasResultsApprovedBySenateStatus = book.student?.statuses?.some(status =>
-        status.isCurrent && status.definition?.name === 'results approved by senate'
-      );
-
-      return hasSenateApprovalDate || hasResultsApprovedBySenateStatus;
-    });
-  }, [filteredData]);
-
-  // Group data for reports tab
-  const groupedReportsData = useMemo(() => {
-    // Use student.course and student.school if available, fallback to registrationNumber and campus.location
-    return groupBy(filteredData, row => row.student?.course || row.student?.registrationNumber?.split('/')[2] || 'Unknown');
-  }, [filteredData]);
-
-  // For each course, group by school (or campus/location)
-  const groupedByCourseAndSchool = useMemo(() => {
-    const result = {};
-    Object.entries(groupedReportsData).forEach(([course, items]) => {
-      result[course] = groupBy(items, row => row.student?.school?.name || row.student?.campus?.location || 'Unknown');
-    });
-    return result;
-  }, [groupedReportsData]);
-
   const groupedBySchoolForSentData = useMemo(() => {
     return groupBy(resultsSentData, row => row.student?.school?.name || row.student?.campus?.location || 'Unknown');
   }, [resultsSentData]);
@@ -225,7 +190,7 @@ const GradeManagementFinalSubmissionTable = ({ data, pageSize, setPageSize, curr
       id: "no",
       size: 40,
     }),
-    columnHelper.accessor(row => `${row.student?.firstName || ""} ${row.student?.lastName || ""}`, {
+    columnHelper.accessor(row => row.student?.fullName || "N/A", {
       header: "NAME",
       id: "studentName",
       size: 160,
@@ -241,19 +206,19 @@ const GradeManagementFinalSubmissionTable = ({ data, pageSize, setPageSize, curr
       id: "gender",
       size: 60,
     }),
-    columnHelper.accessor(row => row.student?.course || "N/A", {
+    columnHelper.accessor(row => row.student?.course?.code || row.student?.course?.title || "N/A", {
       header: "COURSE",
       id: "course",
       size: 80,
     }),
-    columnHelper.accessor(row => `${row.student?.academicYear}` || "N/A", {
+    columnHelper.accessor(row => row.student?.academicYear || "N/A", {
       header: "YEAR OF ENROLLMENT",
       id: "yearOfEnrollment",
       size: 120,
     }),
-    columnHelper.accessor(row => row.student?.registrationNumber?.split('/')[3] || "N/A", {
-      header: "BRANCH",
-      id: "branch",
+    columnHelper.accessor(row => row.student?.campus?.location || "N/A", {
+      header: "CAMPUS",
+      id: "campus",
       size: 80,
     }),
     columnHelper.group({
@@ -391,146 +356,17 @@ const GradeManagementFinalSubmissionTable = ({ data, pageSize, setPageSize, curr
       enableRowSelection: true,
       getCoreRowModel: getCoreRowModel(),
     }),
-    "senate-approval": useReactTable({
-      data: senateApprovalData,
-      columns: getColumnsForTab("senate-approval"),
-      getCoreRowModel: getCoreRowModel(),
-    }),
-    "reports": useReactTable({
-      data: filteredData,
-      columns: getColumnsForTab("reports"),
-      getCoreRowModel: getCoreRowModel(),
-    }),
   };
 
   const currentTable = tableInstances[activeTab];
 
-  const handleExportAll = () => {
-    // Excel export logic
-    const headers = [
-      "No", "NAME", "REG. NO", "GENDER", "COURSE", "YEAR OF ENROLLMENT", "BRANCH",
-      "L.E. text (100%)", "L.E. text (20%)", "E.E. text (100%)", "E.E. text (40%)", "Total text mark (out of 60)",
-      "L.E. viva (100%)", "L.E. viva (20%)", "E.E. viva (100%)", "E.E. viva (20%)", "Total viva mark (out of 40)",
-      "Final Dissertation mark (out of 100)", "Status"
-    ];
 
-    let ws_data = [];
-    ws_data.push(["UGANDA MANAGEMENT INSTITUTE"]);
-    ws_data.push([`PROVISIONAL DISSERTATION EXAMINATION RESULTS FOR THE ACADEMIC YEAR ${currentAcademicYear || '_____/_____'}`]);
-    ws_data.push([]);
-
-    let rowIndex = 0;
-    const formatInstructions = [];
-
-    Object.entries(groupedByCourseAndSchool).forEach(([course, schools]) => {
-      ws_data.push([`Course: ${course}`]);
-      formatInstructions.push({ type: 'course', row: rowIndex });
-      rowIndex++;
-      Object.entries(schools).forEach(([school, items]) => {
-        ws_data.push([`School: ${school}`]);
-        formatInstructions.push({ type: 'school', row: rowIndex });
-        rowIndex++;
-        ws_data.push(headers);
-        formatInstructions.push({ type: 'header', row: rowIndex });
-        rowIndex++;
-        items.forEach((book, index) => {
-          const { textMarks, vivaMarks } = getStudentMarks(book);
-          const regNo = book.student?.registrationNumber || "";
-          const textTotal = (textMarks.internal * 0.2) + (textMarks.external * 0.4);
-          const vivaTotal = (vivaMarks.internal * 0.2) + (vivaMarks.external * 0.2);
-          const finalMark = textTotal + vivaTotal;
-          ws_data.push([
-            index + 1,
-            `${book.student?.firstName || ""} ${book.student?.lastName || ""}`,
-            regNo, book.student?.gender === "male" ? "M" : "F" || "N/A",
-            book.student?.course || regNo.split('/')[2] || "N/A",
-            book.student?.academicYear || `20${regNo.split('/')[0]}` || "N/A",
-            regNo.split('/')[3] || "N/A",
-            textMarks.internal.toFixed(0),
-            (textMarks.internal * 0.2).toFixed(0),
-            textMarks.external.toFixed(0),
-            (textMarks.external * 0.4).toFixed(0),
-            textTotal.toFixed(0),
-            vivaMarks.internal.toFixed(0),
-            (vivaMarks.internal * 0.2).toFixed(0),
-            vivaMarks.external.toFixed(0),
-            (vivaMarks.external * 0.2).toFixed(0),
-            vivaTotal.toFixed(0),
-            finalMark.toFixed(0),
-            book.vivaHistory?.find(v => v.isCurrent)?.status || 'Complete'
-          ]);
-          formatInstructions.push({ type: 'row', row: rowIndex });
-          rowIndex++;
-        });
-        ws_data.push([]);
-        rowIndex++;
-      });
-      ws_data.push([]);
-      rowIndex++;
-    });
-
-    formatInstructions.unshift({ type: 'title', row: 0 });
-    formatInstructions.unshift({ type: 'subtitle', row: 1 });
-
-    const ws = XLSX.utils.aoa_to_sheet(ws_data);
-    ws['!cols'] = [
-      { wch: 5 }, { wch: 22 }, { wch: 14 }, { wch: 8 }, { wch: 18 }, { wch: 18 }, { wch: 12 },
-      { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 18 },
-      { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 18 },
-      { wch: 22 }, { wch: 14 }
-    ];
-
-    formatInstructions.forEach(({ type, row }) => {
-      if (!ws_data[row]) return;
-      const isHeader = type === 'header';
-      const isTitle = type === 'title';
-      const isSubtitle = type === 'subtitle';
-      const isCourse = type === 'course';
-      const isSchool = type === 'school';
-      const isRow = type === 'row';
-      for (let c = 0; c < ws_data[row].length; c++) {
-        const cellRef = XLSX.utils.encode_cell({ r: row, c });
-        if (!ws[cellRef]) continue;
-        if (isTitle) {
-          ws[cellRef].s = { font: { bold: true, sz: 16 }, alignment: { horizontal: 'center' } };
-        } else if (isSubtitle) {
-          ws[cellRef].s = { font: { bold: true, sz: 13 }, alignment: { horizontal: 'center' } };
-        } else if (isHeader) {
-          ws[cellRef].s = { font: { bold: true }, fill: { fgColor: { rgb: 'D9E1F2' } }, border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } }, alignment: { horizontal: 'center' } };
-        } else if (isCourse || isSchool) {
-          ws[cellRef].s = { font: { bold: true, sz: 12 }, alignment: { horizontal: 'left' } };
-        } else if (isRow) {
-          ws[cellRef].s = { border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } }, alignment: { horizontal: 'center' } };
-        }
-      }
-    });
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Report");
-    XLSX.writeFile(wb, `grade_report_${format(new Date(), "yyyy-MM-dd")}.xlsx`);
-  };
 
   const handleExportAllTab = () => {
-    let exportData = [];
-    let columns = [];
-    let sheetTitle = "";
-    switch (activeTab) {
-      case "results-sent":
-        exportData = resultsSentData;
-        columns = getColumnsForTab("results-sent").filter(col => col.id !== 'select');
-        sheetTitle = "Results Sent to School";
-        break;
-      case "senate-approval":
-        exportData = senateApprovalData;
-        columns = getColumnsForTab("senate-approval");
-        sheetTitle = "Results Approved by Senate";
-        break;
-      case "reports":
-        handleExportAll();
-        return;
-      default:
-        return;
-    }
+    let exportData = resultsSentData;
+    let columns = getColumnsForTab("results-sent").filter(col => col.id !== 'select');
+    let sheetTitle = "Results Sent to School";
+
     const headers = columns.map(col => typeof col.header === 'string' ? col.header : '');
     let ws_data = [];
     ws_data.push(["UGANDA MANAGEMENT INSTITUTE"]);
@@ -552,12 +388,27 @@ const GradeManagementFinalSubmissionTable = ({ data, pageSize, setPageSize, curr
 
   const handleExportSchoolData = (schoolName, schoolData) => {
     const wb = XLSX.utils.book_new();
-    const headers = ["No", "NAME", "REG. NO", "GENDER", "COURSE", "YEAR OF ENROLLMENT", "BRANCH", "Final mark", "Status"];
+    const headers = ["No", "NAME", "REG. NO", "GENDER", "COURSE", "YEAR OF ENROLLMENT", "CAMPUS", "Final mark", "Status"];
     const ws_data = [["UGANDA MANAGEMENT INSTITUTE"], [schoolName], [], headers];
     schoolData.forEach((book, index) => {
       const { textMarks, vivaMarks } = getStudentMarks(book);
       const finalMark = (textMarks.internal * 0.2) + (textMarks.external * 0.4) + (vivaMarks.internal * 0.2) + (vivaMarks.external * 0.2);
-      ws_data.push([index + 1, `${book.student?.firstName} ${book.student?.lastName}`, book.student?.registrationNumber, book.student?.gender, book.student?.course, book.student?.academicYear, "", finalMark.toFixed(0), "Complete"]);
+
+      const courseName = typeof book.student?.course === 'string'
+        ? book.student.course
+        : (book.student?.course?.code || book.student?.course?.title || "N/A");
+
+      ws_data.push([
+        index + 1,
+        book.student?.fullName || "N/A",
+        book.student?.registrationNumber || "N/A",
+        book.student?.gender === "male" ? "M" : "F" || "N/A",
+        courseName,
+        book.student?.academicYear || "N/A",
+        book.student?.campus?.location || "N/A",
+        finalMark.toFixed(0),
+        "Complete"
+      ]);
     });
     const ws = XLSX.utils.aoa_to_sheet(ws_data);
     XLSX.utils.book_append_sheet(wb, ws, "Results");
@@ -597,50 +448,25 @@ const GradeManagementFinalSubmissionTable = ({ data, pageSize, setPageSize, curr
     <div className="space-y-4">
       <div className="border-b border-gray-200 pb-4">
         <nav className="flex -mb-px gap-4 justify-end">
-          {["results-sent", "senate-approval", "reports"].map(tab => (
+          {["results-sent"].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`py-2 px-4 text-xs font-medium rounded-lg capitalize ${activeTab === tab ? "bg-[#E8EAF6] text-[#23388F] border-2 border-[#23388F]" : "text-gray-500 hover:text-gray-700 hover:border-gray-300 border-2 border-gray-200"}`}
             >
-              {tab === "results-sent" ? "Results Sent to Schools" : tab.replace(/-/g, ' ')}
+              {tab === "results-sent" ? "Results Sent to School" : tab.replace(/-/g, ' ')}
             </button>
           ))}
         </nav>
       </div>
 
       <div>
-        {activeTab === 'reports' ? (
-          <div className="space-y-4">
-            <div className="text-center">
-              <h1 className="font-bold text-lg">UGANDA MANAGEMENT INSTITUTE</h1>
-              <h2 className="font-semibold">PROVISIONAL DISSERTATION EXAMINATION RESULTS</h2>
-            </div>
-            <div className="flex justify-end">
-              <Button onClick={handleExportAllTab} className="flex items-center gap-2">
-                <Download className="h-4 w-4" /> Export All
-              </Button>
-            </div>
-            {Object.entries(groupedByCourseAndSchool).map(([course, schools]) => (
-              <div key={course} className="mb-8">
-                <h3 className="text-lg font-bold mb-2">Course: {course}</h3>
-                {Object.entries(schools).map(([school, items]) => (
-                  <div key={school} className="mb-6">
-                    <h4 className="text-base font-semibold mb-1">School: {school}</h4>
-                    <GroupedReportTable items={items} reportsColumns={reportsColumns} TableComponent={TableComponent} />
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        ) : activeTab === 'results-sent' ? (
+        {activeTab === 'results-sent' ? (
           <div className="space-y-6">
             {Object.entries(groupedBySchoolForSentData).map(([schoolName, schoolData]) => (
               <SchoolTable key={schoolName} schoolName={schoolName} schoolData={schoolData} onExport={handleExportSchoolData} currentAcademicYear={currentAcademicYear} getColumnsForTab={getColumnsForTab} tab="results-sent" />
             ))}
           </div>
-        ) : activeTab === 'senate-approval' ? (
-          <TableComponent table={currentTable} />
         ) : null}
       </div>
 

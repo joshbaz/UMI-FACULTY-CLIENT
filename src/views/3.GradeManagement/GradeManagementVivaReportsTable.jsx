@@ -12,22 +12,7 @@ import * as XLSX from 'xlsx';
 
 const columnHelper = createColumnHelper();
 
-const getStudentMarks = (row) => {
-  let textMarks = { internal: 0, external: 0 };
-  const currentAssignments = row.examinerAssignments?.filter(a => a.isCurrent);
-  currentAssignments?.forEach(a => {
-    if (a.examiner?.type === 'Internal') textMarks.internal = a.grade || 0;
-    if (a.examiner?.type === 'External') textMarks.external = a.grade || 0;
-  });
 
-  const currentViva = row.vivaHistory?.find(v => v.isCurrent);
-  const vivaMarks = {
-    internal: currentViva?.internalMark || 0,
-    external: currentViva?.externalMark || 0
-  };
-
-  return { textMarks, vivaMarks };
-};
 
 const getSupervisorByRole = (student, targetRole) => {
   if (!student || !student.supervisors || !student.supervisorRoles) return "N/A";
@@ -67,7 +52,7 @@ function groupBy(arr, keyFn) {
   }, {});
 }
 
-const GradeManagementVivaReportsTable = ({ data, proposalsData, pageSize, setPageSize, currentPage, setCurrentPage, totalCount }) => {
+const GradeManagementVivaReportsTable = ({ proposalsData }) => {
   const [activeTab, setActiveTab] = useState("proposal-defense-completed");
   // Date range filter state for Proposal Defense Completed tab
   const [startDate, setStartDate] = useState("");
@@ -97,29 +82,6 @@ const GradeManagementVivaReportsTable = ({ data, proposalsData, pageSize, setPag
       return true;
     });
   }, [completedProposals, startDate, endDate]);
-
-  // Books (Viva)
-  const filteredBooksData = useMemo(() => (data || []).filter(book => {
-    const isCurrentBook = book.isCurrent === true;
-    const hasFinalStatus = book.student?.statuses?.some(status =>
-      status.definition?.name === 'final dissertation & compliance report received'
-    );
-    const isNotGraduated = !book.student?.statuses?.some(status =>
-      status.isCurrent &&
-      status.definition?.name === 'graduated'
-    );
-    return isCurrentBook && hasFinalStatus && isNotGraduated;
-  }), [data]);
-  const completedBooks = useMemo(() => filteredBooksData.filter(book => {
-    const hasVivaHistory = book.vivaHistory && book.vivaHistory.length > 0;
-    const hasCurrentViva = book.vivaHistory?.some(v => v.isCurrent);
-    return hasVivaHistory && hasCurrentViva;
-  }), [filteredBooksData]);
-  const pendingBooks = useMemo(() => filteredBooksData.filter(book => {
-    const hasVivaHistory = book.vivaHistory && book.vivaHistory.length > 0;
-    const hasCurrentViva = book.vivaHistory?.some(v => v.isCurrent);
-    return !hasVivaHistory || !hasCurrentViva;
-  }), [filteredBooksData]);
 
   // Columns for proposals
   const proposalColumns = useMemo(() => [
@@ -167,100 +129,10 @@ const GradeManagementVivaReportsTable = ({ data, proposalsData, pageSize, setPag
       size: 100,
     })
   ], []);
-  // Columns for viva
-  const vivaColumns = useMemo(() => [
-    columnHelper.accessor((row, index) => index + 1, {
-      header: "No",
-      id: "no",
-      size: 40,
-    }),
-    columnHelper.accessor(row => row.student?.fullName || "N/A", {
-      header: "NAME",
-      id: "studentName",
-      size: 160,
-    }),
-    columnHelper.accessor("student.registrationNumber", {
-      header: "REG. NO",
-      id: "registrationNo",
-      cell: info => info.getValue() || "N/A",
-      size: 120,
-    }),
-    columnHelper.accessor(row => row?.student?.gender === "male" ? "M" : "F" || "N/A", {
-      header: "GENDER",
-      id: "gender",
-      size: 60,
-    }),
-    columnHelper.accessor(row => row.student?.course || "N/A", {
-      header: "COURSE",
-      id: "course",
-      size: 80,
-    }),
-    columnHelper.accessor(row => `${row.student?.academicYear}` || "N/A", {
-      header: "YEAR OF ENROLLMENT",
-      id: "yearOfEnrollment",
-      size: 120,
-    }),
-    columnHelper.accessor(row => getSchoolName(row.student), {
-      header: "SCHOOL",
-      id: "school",
-      size: 120,
-    }),
-    columnHelper.accessor(row => {
-      const currentViva = row.vivaHistory?.find(v => v.isCurrent);
-      return currentViva?.vivaDate ? format(new Date(currentViva.vivaDate), "dd/MM/yyyy") : "N/A";
-    }, {
-      header: "VIVA DATE",
-      id: "vivaDate",
-      size: 100,
-    }),
-    columnHelper.group({
-      header: 'VIVA MARKS',
-      columns: [
-        columnHelper.accessor(row => getStudentMarks(row).vivaMarks.internal, {
-          header: 'Internal (100%)',
-          id: 'viva_internal_100',
-          cell: info => info.getValue()?.toFixed(0) || "N/A",
-          size: 80,
-        }),
-        columnHelper.accessor(row => getStudentMarks(row).vivaMarks.internal * 0.2, {
-          header: 'Internal (20%)',
-          id: 'viva_internal_20',
-          cell: info => info.getValue()?.toFixed(0) || "N/A",
-          size: 80,
-        }),
-        columnHelper.accessor(row => getStudentMarks(row).vivaMarks.external, {
-          header: 'External (100%)',
-          id: 'viva_external_100',
-          cell: info => info.getValue()?.toFixed(0) || "N/A",
-          size: 80,
-        }),
-        columnHelper.accessor(row => getStudentMarks(row).vivaMarks.external * 0.2, {
-          header: 'External (20%)',
-          id: 'viva_external_20',
-          cell: info => info.getValue()?.toFixed(0) || "N/A",
-          size: 80,
-        }),
-      ]
-    }),
-    columnHelper.accessor(row => (getStudentMarks(row).vivaMarks.internal * 0.2) + (getStudentMarks(row).vivaMarks.external * 0.2), {
-      header: 'Total Viva Mark (out of 40)',
-      id: 'total_viva_mark',
-      cell: info => info.getValue()?.toFixed(0) || "N/A",
-      size: 120,
-    }),
-    columnHelper.accessor(row => row.vivaHistory?.find(v => v.isCurrent)?.status || 'N/A', {
-      header: 'VIVA STATUS',
-      id: 'vivaStatus',
-      size: 100,
-    })
-  ], []);
 
   // Export headers and row logic for each tab
   const proposalExportHeaders = [
     "REGISTRATION NUMBER", "NAME", "RESEARCH TOPIC", "DEFENSE DATE", "MAIN SUPERVISOR", "CO-SUPERVISOR", "STATUS"
-  ];
-  const vivaExportHeaders = [
-    "No", "NAME", "REG. NO", "GENDER", "COURSE", "YEAR OF ENROLLMENT", "SCHOOL", "VIVA DATE", "Internal (100%)", "Internal (20%)", "External (100%)", "External (20%)", "Total Viva Mark (out of 40)", "VIVA STATUS"
   ];
   const getProposalExportRow = (item) => {
     const currentDefense = item.defenses?.find(d => d.isCurrent);
@@ -278,27 +150,6 @@ const GradeManagementVivaReportsTable = ({ data, proposalsData, pageSize, setPag
       status
     ];
   };
-  const getVivaExportRow = (item, index) => {
-    const { vivaMarks } = getStudentMarks(item);
-    const currentViva = item.vivaHistory?.find(v => v.isCurrent);
-    const vivaTotal = (vivaMarks.internal * 0.2) + (vivaMarks.external * 0.2);
-    return [
-      index + 1,
-      item.student?.fullName || "N/A",
-      item.student?.registrationNumber || "N/A",
-      item.student?.gender === "male" ? "M" : "F" || "N/A",
-      item.student?.course || "N/A",
-      item.student?.academicYear || "N/A",
-      getSchoolName(item.student),
-      currentViva?.vivaDate ? format(new Date(currentViva.vivaDate), "dd/MM/yyyy") : "N/A",
-      vivaMarks.internal.toFixed(0),
-      (vivaMarks.internal * 0.2).toFixed(0),
-      vivaMarks.external.toFixed(0),
-      (vivaMarks.external * 0.2).toFixed(0),
-      vivaTotal.toFixed(0),
-      currentViva?.status || 'N/A'
-    ];
-  };
 
   // --- Select correct data/columns/export logic for activeTab ---
   let tabData, columnsForTab, exportHeaders, getExportRow;
@@ -307,21 +158,11 @@ const GradeManagementVivaReportsTable = ({ data, proposalsData, pageSize, setPag
     columnsForTab = proposalColumns;
     exportHeaders = proposalExportHeaders;
     getExportRow = getProposalExportRow;
-  } else if (activeTab === "proposal-defense-pending") {
+  } else {
     tabData = pendingProposals;
     columnsForTab = proposalColumns;
     exportHeaders = proposalExportHeaders;
     getExportRow = getProposalExportRow;
-  } else if (activeTab === "viva-completed") {
-    tabData = completedBooks;
-    columnsForTab = vivaColumns;
-    exportHeaders = vivaExportHeaders;
-    getExportRow = getVivaExportRow;
-  } else {
-    tabData = pendingBooks;
-    columnsForTab = vivaColumns;
-    exportHeaders = vivaExportHeaders;
-    getExportRow = getVivaExportRow;
   }
 
   // Group by school for the current tab
@@ -440,18 +281,6 @@ const GradeManagementVivaReportsTable = ({ data, proposalsData, pageSize, setPag
             className={`py-2 px-4 text-xs font-medium rounded-lg ${activeTab === "proposal-defense-pending" ? "bg-[#E8EAF6] text-[#23388F] border-2 border-[#23388F]" : "text-gray-500 hover:text-gray-700 hover:border-gray-300 border-2 border-gray-200"}`}
           >
             Proposal Defense Pending
-          </button>
-          <button
-            onClick={() => setActiveTab("viva-completed")}
-            className={`py-2 px-4 text-xs font-medium rounded-lg ${activeTab === "viva-completed" ? "bg-[#E8EAF6] text-[#23388F] border-2 border-[#23388F]" : "text-gray-500 hover:text-gray-700 hover:border-gray-300 border-2 border-gray-200"}`}
-          >
-            Viva Completed
-          </button>
-          <button
-            onClick={() => setActiveTab("viva-pending")}
-            className={`py-2 px-4 text-xs font-medium rounded-lg ${activeTab === "viva-pending" ? "bg-[#E8EAF6] text-[#23388F] border-2 border-[#23388F]" : "text-gray-500 hover:text-gray-700 hover:border-gray-300 border-2 border-gray-200"}`}
-          >
-            Viva Pending
           </button>
         </nav>
       </div>
