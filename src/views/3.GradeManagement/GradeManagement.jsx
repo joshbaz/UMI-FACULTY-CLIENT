@@ -12,6 +12,8 @@ import { InfoIcon } from "lucide-react";
 import GradeManagementTableTabs from "./GradeManagementTableTabs";
 import GradeManagementBookTable from "./GradeManagementBookTable";
 import GradeManagementProposalTable from "./GradeManagementProposalTable";
+import GradeManagementVivaReportsTable from "./GradeManagementVivaReportsTable";
+import GradeManagementFinalSubmissionTable from "./GradeManagementFinalSubmissionTable";
 
 const GradeManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,7 +59,7 @@ const GradeManagement = () => {
 
   // Pagination logic
   const startIndex = (currentPage - 1) * pageSize;
-  const paginatedData = activeTab === "Proposal Grading" 
+  const paginatedData = activeTab === "Proposal Grading"
     ? filteredProposals.slice(startIndex, startIndex + pageSize)
     : filteredBooks.slice(startIndex, startIndex + pageSize);
 
@@ -72,15 +74,15 @@ const GradeManagement = () => {
 
   const passedProposals = useMemo(() => {
     return (proposalsData?.proposals || []).filter(proposal => {
-      return proposal.statuses?.some(status => 
+      return proposal.statuses?.some(status =>
         status.definition?.name?.includes("passed-proposal graded")
       );
     }).length;
   }, [proposalsData?.proposals]);
-  
+
   const failedProposals = useMemo(() => {
     return (proposalsData?.proposals || []).filter(proposal => {
-      return proposal.statuses?.some(status => 
+      return proposal.statuses?.some(status =>
         status.definition?.name?.includes("failed-proposal graded")
       );
     }).length;
@@ -139,7 +141,7 @@ const GradeManagement = () => {
       <div className="grid grid-cols-3 gap-4 px-6">
         <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
           <p className="text-3xl font-[Inter-Medium]">
-          {activeTab === "Proposal Grading" ? totalProposals : totalBooks}
+            {activeTab === "Proposal Grading" ? totalProposals : totalBooks}
           </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             {activeTab === "Proposal Grading" ? "Proposals Submitted" : "Dissertations Submitted"}
@@ -148,7 +150,7 @@ const GradeManagement = () => {
 
         <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
           <p className="text-3xl font-[Inter-Medium]">
-          {activeTab === "Proposal Grading" ? passedProposals : passedBooks}
+            {activeTab === "Proposal Grading" ? passedProposals : passedBooks}
           </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             <div className="flex items-center gap-1">
@@ -169,7 +171,7 @@ const GradeManagement = () => {
 
         <div className="bg-white flex flex-col gap-2 items-center justify-center p-4 rounded-lg shadow-md">
           <p className="text-3xl font-[Inter-Medium]">
-          {activeTab === "Proposal Grading" ? failedProposals : failedBooks}
+            {activeTab === "Proposal Grading" ? failedProposals : failedBooks}
           </p>
           <h3 className="text-sm font-[Inter-Medium] text-gray-500">
             <div className="flex items-center gap-1">
@@ -198,20 +200,39 @@ const GradeManagement = () => {
 
         <div className="px-4 mt-4">
           {activeTab === "Proposal Grading" ? (
-            <GradeManagementProposalTable 
+            <GradeManagementProposalTable
               data={paginatedData}
               pageSize={pageSize}
               setPageSize={setPageSize}
-              currentPage={currentPage} 
+              currentPage={currentPage}
               setCurrentPage={setCurrentPage}
               totalCount={filteredProposals.length}
             />
           ) : activeTab === "Dissertation Examination" ? (
-            <GradeManagementBookTable 
+            <GradeManagementBookTable
               data={paginatedData}
               pageSize={pageSize}
               setPageSize={setPageSize}
-              currentPage={currentPage} 
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              totalCount={filteredBooks.length}
+            />
+          ) : activeTab === "Proposal Defense & Viva Reports" ? (
+            <GradeManagementVivaReportsTable
+              data={booksData?.books}
+              proposalsData={proposalsData?.proposals}
+              pageSize={pageSize}
+              setPageSize={setPageSize}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              totalCount={filteredBooks.length}
+            />
+          ) : activeTab === "Results & Final Submission" ? (
+            <GradeManagementFinalSubmissionTable
+              data={booksData?.books}
+              pageSize={pageSize}
+              setPageSize={setPageSize}
+              currentPage={currentPage}
               setCurrentPage={setCurrentPage}
               totalCount={filteredBooks.length}
             />

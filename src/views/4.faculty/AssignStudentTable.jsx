@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { useReactTable, getCoreRowModel, flexRender,  getPaginationRowModel,
-  getFilteredRowModel, createColumnHelper } from "@tanstack/react-table";
+import {
+  useReactTable, getCoreRowModel, flexRender, getPaginationRowModel,
+  getFilteredRowModel, createColumnHelper
+} from "@tanstack/react-table";
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -39,7 +41,7 @@ const AssignStudentTable = ({
     navigate(`/students/profile/${studentId}`);
   };
 
-  
+
 
   const columnHelper = createColumnHelper();
   const columns = [
@@ -107,14 +109,12 @@ const AssignStudentTable = ({
               row.original.statuses?.find((s) => s.isCurrent)?.definition
                 ?.color || "#000",
             backgroundColor:
-              `${
-                row.original.statuses?.find((s) => s.isCurrent)?.definition
-                  ?.color
+              `${row.original.statuses?.find((s) => s.isCurrent)?.definition
+                ?.color
               }18` || "#00000018",
-            border: `1px solid ${
-              row.original.statuses?.find((s) => s.isCurrent)?.definition
+            border: `1px solid ${row.original.statuses?.find((s) => s.isCurrent)?.definition
                 ?.color || "#000"
-            }`,
+              }`,
             padding: "0.25rem 0.5rem",
             borderRadius: "0.375rem",
             display: "inline-block",
@@ -134,11 +134,10 @@ const AssignStudentTable = ({
         const isAssigned = selectedStudents.some(student => student.id === row.original.id);
         return (
           <button
-            className={`w-max px-4 py-1 rounded border text-sm font-inter font-semibold shadow-[0px_1px_2px_0px_#0000000D] hover:bg-gray-50 ${
-              isAssigned 
-                ? "border-red-500 text-red-500 hover:bg-red-50" 
+            className={`w-max px-4 py-1 rounded border text-sm font-inter font-semibold shadow-[0px_1px_2px_0px_#0000000D] hover:bg-gray-50 ${isAssigned
+                ? "border-red-500 text-red-500 hover:bg-red-50"
                 : "border-[#E5E7EB] text-[#111827]"
-            }`}
+              }`}
             onClick={() => onAssignToggle(row.original)}
           >
             {isAssigned ? "Unassign" : "Assign"}
@@ -164,92 +163,91 @@ const AssignStudentTable = ({
 
   return (
     <div className="overflow-x-auto bg-white shadow-md ">
-         <div className="overflow-x-auto">
-         <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  className="px-4 py-3 text-left text-[#111827] font-inter font-semibold text-[14px] leading-[20px]"
-                >
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <td
-                  key={cell.id}
-                  className="px-4 py-2 whitespace-nowrap text-[#111827] font-inter font-normal text-[14px] leading-[20px]"
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    className="px-4 py-3 text-left text-[#111827] font-inter font-semibold text-[14px] leading-[20px]"
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    className="px-4 py-2 whitespace-nowrap text-[#111827] font-inter font-normal text-[14px] leading-[20px]"
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-         </div>
+      </div>
 
-          {/* Pagination */}
+      {/* Pagination */}
       <div className="px-6 py-3 flex items-center justify-between border-t border-gray-200 bg-white">
-      <div className="flex items-center text-sm text-gray-500">
-        Showing{' '}
-        <span className="font-medium mx-1">
-          {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}
-        </span>
-        to{' '}
-        <span className="font-medium mx-1">
-          {Math.min(
-            (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-            table.getPrePaginationRowModel().rows.length
-          )}
-        </span>
-        of{' '}
-        <span className="font-medium mx-1">{table.getPrePaginationRowModel().rows.length}</span>{' '}
-        results
-      </div>
-      <div className="flex items-center gap-2">
-        <button
-          className="border rounded p-1 text-sm disabled:opacity-50"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </button>
-        {Array.from({ length: table.getPageCount() }, (_, i) => i + 1).map(pageNumber => (
+        <div className="flex items-center text-sm text-gray-500">
+          Showing{' '}
+          <span className="font-medium mx-1">
+            {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}
+          </span>
+          to{' '}
+          <span className="font-medium mx-1">
+            {Math.min(
+              (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+              table.getPrePaginationRowModel().rows.length
+            )}
+          </span>
+          of{' '}
+          <span className="font-medium mx-1">{table.getPrePaginationRowModel().rows.length}</span>{' '}
+          results
+        </div>
+        <div className="flex items-center gap-2">
           <button
-            key={pageNumber}
-            className={`w-8 h-8 rounded text-sm ${
-              pageNumber === table.getState().pagination.pageIndex + 1
-                ? 'bg-blue-50 text-blue-600 font-medium'
-                : 'text-gray-500'
-            }`}
-            onClick={() => table.setPageIndex(pageNumber - 1)}
+            className="border rounded p-1 text-sm disabled:opacity-50"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
           >
-            {pageNumber}
+            Previous
           </button>
-        ))}
-        <button
-          className="border rounded p-1 text-sm disabled:opacity-50"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </button>
+          {Array.from({ length: table.getPageCount() }, (_, i) => i + 1).map(pageNumber => (
+            <button
+              key={pageNumber}
+              className={`w-8 h-8 rounded text-sm ${pageNumber === table.getState().pagination.pageIndex + 1
+                  ? 'bg-blue-50 text-blue-600 font-medium'
+                  : 'text-gray-500'
+                }`}
+              onClick={() => table.setPageIndex(pageNumber - 1)}
+            >
+              {pageNumber}
+            </button>
+          ))}
+          <button
+            className="border rounded p-1 text-sm disabled:opacity-50"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </button>
+        </div>
       </div>
-    </div>
-     
+
     </div>
   );
 };

@@ -2,15 +2,15 @@ import axios from "axios"
 import apiRequest, { BASE_API_URL } from "../../../utils/apiRequestUrl.js"
 
 
-/* ********** ERROR HANDLING ********** */  
+/* ********** ERROR HANDLING ********** */
 
 const errorHandling = (error: any) => {
     if (error?.response) {
-        throw {message: `Error ${error.response.status}: ${error.response.statusText}. ${error.response?.data?.message}`}
+        throw { message: `Error ${error.response.status}: ${error.response.statusText}. ${error.response?.data?.message}` }
     } else if (error.request) {
-        throw {message: "No response from server. Please check your network connection."}
+        throw { message: "No response from server. Please check your network connection." }
     } else {
-        throw {message: `Request failed: ${error.message}`}
+        throw { message: `Request failed: ${error.message}` }
     }
 }
 
@@ -75,13 +75,13 @@ export const getAllStudents = async () => {
 }
 
 export const getStudent = async (studentId: string) => {
-    try {   
+    try {
         const response = await apiRequest.get(`/faculty/students/${studentId}`)
         return response.data
     } catch (error) {
         errorHandling(error)
     }
-}   
+}
 
 export const getStudentStatuses = async (studentId: string) => {
     try {
@@ -99,10 +99,10 @@ export const getStudentStatuses = async (studentId: string) => {
 export const submitProposalService = async (studentId: string, proposal: any) => {
     try {
         const token = localStorage.getItem('umi_auth_token')
-        const response = await apiRequest.post(`/faculty/proposals/${studentId}`, proposal,{
+        const response = await apiRequest.post(`/faculty/proposals/${studentId}`, proposal, {
             headers: {
                 'Content-Type': 'multipart/form-data',
-               
+
             }
         })
         return response.data
@@ -166,24 +166,24 @@ export const addComplianceReportDateService = async (proposalId: string, complia
 }
 
 export const generateDefenseReportService = async (proposalId: string, reportData: FormData) => {
-  try {
-    const response = await apiRequest.post(`/faculty/generate-defense-report/${proposalId}`, reportData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  } catch (error) {
-    errorHandling(error);
-  }
+    try {
+        const response = await apiRequest.post(`/faculty/generate-defense-report/${proposalId}`, reportData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
 }
 
 export const getProposalDefenseReportsService = async (proposalId: string) => {
     try {
-    const response = await apiRequest.get(`/faculty/proposal/${proposalId}/defense-reports`);
-    return response.data;
+        const response = await apiRequest.get(`/faculty/proposal/${proposalId}/defense-reports`);
+        return response.data;
     } catch (error) {
-    errorHandling(error);
+        errorHandling(error);
     }
 }
 
@@ -191,21 +191,21 @@ export const getProposalDefenseReportsService = async (proposalId: string) => {
 
 export const downloadProposalDefenseReportService = async (reportId) => {
     try {
-      const response = await apiRequest.get(
-        `/faculty/defense-reports/${reportId}/download`,
-        {
-          responseType: 'blob', // Important: This tells axios to expect binary data
-          headers: {
-            'Accept': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-          }
-        }
-      );
-      return response;
+        const response = await apiRequest.get(
+            `/faculty/defense-reports/${reportId}/download`,
+            {
+                responseType: 'blob', // Important: This tells axios to expect binary data
+                headers: {
+                    'Accept': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                }
+            }
+        );
+        return response;
     } catch (error) {
-      console.error('Error downloading report:', error);
-      throw error;
+        console.error('Error downloading report:', error);
+        throw error;
     }
-  }; 
+};
 
 
 
@@ -264,13 +264,13 @@ export const addPanelistsService = async (proposalId: string, panelists: any) =>
 }
 
 export const getPanelistsService = async () => {
-    try {   
+    try {
         const response = await apiRequest.get("/faculty/panelists")
         return response.data
     } catch (error) {
         errorHandling(error)
     }
-}   
+}
 
 
 export const deletePanelistService = async (proposalId: string, panelistId: string) => {
@@ -293,7 +293,7 @@ export const addReviewerMarkService = async (proposalId: string, reviewerId: str
     } catch (error) {
         errorHandling(error)
     }
-}   
+}
 
 /* ********** PANELIST MARK MANAGEMENT ********** */
 
@@ -412,52 +412,52 @@ export const updateInternalExaminerMarkService = async (assignmentId: string, ma
 /* ********** BOOK MANAGEMENT ********** */
 
 export const getAllBooksService = async () => {
-  try {
-    const response = await apiRequest.get('/faculty/books');
-    return response.data;
-  } catch (error) {
-    errorHandling(error);
-  }
+    try {
+        const response = await apiRequest.get('/faculty/books');
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
 }
 
 export const getBookService = async (bookId: string) => {
-  try {
-    const response = await apiRequest.get(`/faculty/books/${bookId}`);
-    return response.data;
-  } catch (error) {
-    errorHandling(error);
-  }
+    try {
+        const response = await apiRequest.get(`/faculty/books/${bookId}`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
 }
 
 export const getStudentBooksService = async (studentId: string) => {
-  try {
-    const response = await apiRequest.get(`/faculty/student-books/${studentId}`);
-    return response.data;
-  } catch (error) {
-    errorHandling(error);
-  }
+    try {
+        const response = await apiRequest.get(`/faculty/student-books/${studentId}`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
 }
 
 /** Chairperson */
 export const getChairpersonsService = async () => {
-  try {
-    const response = await apiRequest.get('/faculty/chairperson');
-    return response.data;
-  } catch (error) {
-    errorHandling(error);
-  }
+    try {
+        const response = await apiRequest.get('/faculty/chairperson');
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
 }
 
 export const createChairpersonService = async (name: string, email: string) => {
-  try {
-    const response = await apiRequest.post('/faculty/chairperson', {
-      name,
-      email
-    });
-    return response.data;
-  } catch (error) {
-    errorHandling(error);
-  }
+    try {
+        const response = await apiRequest.post('/faculty/chairperson', {
+            name,
+            email
+        });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
 }
 
 
@@ -481,8 +481,8 @@ export const getDashboardStatsService = async () => {
 export const getStatusStatisticsService = async (category?: string) => {
     try {
         console.log("category", category);
-        const url = category 
-            ? `/faculty/dashboard/status-statistics?category=${category}` 
+        const url = category
+            ? `/faculty/dashboard/status-statistics?category=${category}`
             : '/faculty/dashboard/status-statistics';
         const response = await apiRequest.get(url);
         return response.data;
@@ -517,32 +517,32 @@ export const getNotificationsService = async () => {
 
 
 /* ********** PROPOSAL DEFENSE MANAGEMENT ********** */
- // Start of Selection
+// Start of Selection
 export const scheduleProposalDefenseService = async (
-  proposalId: string,
-  scheduledDate: string,
-  details: {
-    location: string;
-    chairpersonId: string;
-    minutesSecretaryId: string;
-    panelistIds: string[];
-    reviewerIds: string[];
-  }
+    proposalId: string,
+    scheduledDate: string,
+    details: {
+        location: string;
+        chairpersonId: string;
+        minutesSecretaryId: string;
+        panelistIds: string[];
+        reviewerIds: string[];
+    }
 ) => {
-  try {
-    const payload = {
-      scheduledDate,
-      ...details,
-    };
-    const response = await apiRequest.post(
-      `/faculty/proposals/${proposalId}/defenses`,
-      payload
-    );
-    return response.data;
-  } catch (error) {
-    errorHandling(error);
-    throw error;
-  }
+    try {
+        const payload = {
+            scheduledDate,
+            ...details,
+        };
+        const response = await apiRequest.post(
+            `/faculty/proposals/${proposalId}/defenses`,
+            payload
+        );
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+        throw error;
+    }
 };
 
 export const recordProposalDefenseVerdictService = async (defenseId: string, verdict: string, comments: string) => {
@@ -770,3 +770,16 @@ export const createPanelistFromStaffService = async (staffMemberId: string) => {
         errorHandling(error);
     }
 };
+
+/* ********** STUDENT PROGRESS MANAGEMENT ********** */
+
+export const sendResultsEmailService = async (emailData: any) => {
+    try {
+        const response = await apiRequest.post("/email/send-results", emailData);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}
+
+/* ********** END OF STUDENT PROGRESS MANAGEMENT ********** */
